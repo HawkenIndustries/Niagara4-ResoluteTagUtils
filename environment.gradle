@@ -1,0 +1,13 @@
+/*
+ * Copyright 2019 Resolute, All Rights Reserved.
+ */
+/* Environment Configuration File */
+
+// Change niagara_home and niagara_user_home as needed to point to the
+// correct path to your desired Niagara install and its associated
+// user home
+gradle.ext.niagara_dev_home = "C:/Users/Victor Smolinski/Niagara4.6/tridium/ResoluteTagUtils"
+gradle.ext.niagara_home = "c:/jci/fxworkbench-14.6"
+gradle.ext.niagara_user_home = "C:/Users/Victor Smolinski/Niagara4.6/tridium"
+gradle.ext.rt_build_home = "C:/Users/Victor Smolinski/Niagara4.6/tridium/ResoluteTagUtils/ResoluteTagUtils-rt/build/libs"
+gradle.ext.dist_home = "C:/Users/Victor Smolinski/Niagara4.6/tridium/ResoluteTagUtils/libs"

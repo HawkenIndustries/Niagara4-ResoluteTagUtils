@@ -1,0 +1,17 @@
+# Project exclude paths
+/.gradle/
+/build/
+/resolute/ResoluteTagUtils-rt/build/
+/resolute/ResoluteTagUtils-rt/build/classes/java/main/
+/resolute/ResoluteTagUtils-rt/build/classes/java/niagaraModuleTest/
+/resolute/ResoluteTagUtils-se/build/
+/resolute/ResoluteTagUtils-ux/build/
+/resolute/ResoluteTagUtils-wb/build/
+.idea/
+sign*
+devOps*
+.lock
+.bin
+.properties
+.class
+cache*

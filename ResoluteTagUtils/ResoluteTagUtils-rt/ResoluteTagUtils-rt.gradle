@@ -1,0 +1,82 @@
+/* Module Build File */
+
+description     = "Utilities to perform out-of-band tag import / export and tagging ops."
+ext {
+}
+niagaraModule {
+  moduleName = "ResoluteTagUtils"
+  preferredSymbol = "restu"
+  runtimeProfile = "rt"
+  certAlias = "n4mod-cert"
+
+  modulePart {
+      name = "ResoluteTagUtils-ux"
+      runtimeProfile = "ux"
+  }
+
+  modulePart {
+      name = "ResoluteTagUtils-wb"
+      runtimeProfile = "wb"
+  }
+}
+
+dependencies {
+  compile "Tridium:nre:4.6"
+  compile "Tridium:baja:4.6"
+  compile "Tridium:aaphp-rt:4.6"
+  compile "Tridium:bajaScript-ux:4.6"
+  compile "Tridium:bajaui-wb:4.6"
+  compile "Tridium:bajaux-rt:4.6"
+  compile "Tridium:bajaux-ux:4.6"
+  compile "Tridium:control-rt:4.6"
+  compile "Tridium:control-ux:4.6"
+  compile "Tridium:control-wb:4.6"
+  compile "Tridium:converters-rt:4.6"
+  compile "Tridium:driver-rt:4.6"
+  compile "Tridium:driver-ux:4.6"
+  compile "Tridium:driver-wb:4.6"
+  compile "Tridium:entityIo-rt:4.6"
+  compile "Tridium:file-rt:4.6"
+  compile "Tridium:gx-rt:4.6"
+  compile "Tridium:gx-ux:4.6"
+  compile "Tridium:gx-wb:4.6"
+  compile "Tridium:haystack-rt:4.6"
+  compile "Tridium:hierarchy-rt:4.6"
+  compile "Tridium:history-rt:4.6"
+  compile "JohnsonControls:jciAutoExport:14.6"
+  compile "JohnsonControls:jciAutoImport:14.6"
+  compile "JohnsonControls:jciSpaces:14.6"
+  compile "JohnsonControls:jciSupport:14.6"
+  compile "JohnsonControls:jciTagDictionary:14.6"
+  compile "JohnsonControls:jciTools:14.6"
+  compile "Trdium:kitPx-wb:4.6"
+  compile "Tridium:neql-rt:4.6"
+  compile "Tridium:schedule-rt:4.6"
+  compile "Tridium:search-rt:4.6"
+  compile "Tridium:systemDb-rt:4.6"
+  compile "Tridium:systemIndex-rt:4.6"
+  compile "Tridium:systemMonitor-rt:4.6"
+  compile "Tridium:tagdictionary-rt:4.6"
+  compile "Tridium:template-rt:4.6"
+  compile "Tridium:wbutil-wb:4.6"
+  compile "Tridium:webEditors-ux:4.6"
+  compile "Tridium:workbench-wb:4.6"
+  uberjar 'com.google.code.gson:gson:2.8.5'
+
+}
+
+jar{
+  from("src"){
+    include '/rc/*.txt'
+  }doLast {
+    apply from: "${rootDir}/gradle/signJar.gradle"
+    tasks.withType(Exec) { Exec task ->
+      task.execute()
+    }
+  }
+}
+
+moduleTestJar {
+  from('srcTest') {
+  }
+}

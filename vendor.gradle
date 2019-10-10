@@ -1,0 +1,9 @@
+/*
+ * Copyright 2019 Resolute, All Rights Reserved.
+ */
+/* Vendor Configuration File */
+group = 'com.resolute'
+
+def moduleVersion = '1.0'
+def moduleVersionPatch = [:]
+version = "${moduleVersion}${moduleVersionPatch.get(project.name, '')}"

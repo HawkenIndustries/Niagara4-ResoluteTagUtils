@@ -1,0 +1,65 @@
+/* Module Build File */
+
+description     = "Utilities to perform out-of-band tag import / export and tagging ops."
+ext {
+}
+niagaraModule {
+  moduleName = "ResoluteTagUtils"
+  preferredSymbol = "restu"
+  runtimeProfile = "wb"
+}
+
+dependencies {
+  compile "Tridium:nre:4.6"
+  compile "Tridium:baja:4.6"
+  compile "Tridium:aaphp-rt:4.6"
+  compile "Tridium:control-rt:4.6"
+  compile "Tridium:control-ux:4.6"
+  compile "Tridium:control-wb:4.6"
+  compile "Tridium:converters-rt:4.6"
+  compile "Tridium:entityIo-rt:4.6"
+  compile "Tridium:file-rt:4.6"
+  compile "Tridium:gx-rt:4.6"
+  compile "Tridium:gx-ux:4.6"
+  compile "Tridium:gx-wb:4.6"
+  compile "Tridium:haystack-rt:4.6"
+  compile "Tridium:hierarchy-rt:4.6"
+  compile "Tridium:hierarchy-ux:4.6"
+  compile "Tridium:hierarchy-wb:4.6"
+  compile "Tridium:history-rt:4.6"
+  compile "Tridium:history-ux:4.6"
+  compile "Tridium:history-wb:4.6"
+  compile "JohnsonControls:jciAutoExport:14.6"
+  compile "JohnsonControls:jciAutoImport:14.6"
+  compile "JohnsonControls:jciAutoTagging:14.6"
+  compile "JohnsonControls:jciDictionary:14.6"
+  compile "JohnsonControls:jciSpaces:14.6"
+  compile "JohnsonControls:jciSupport:14.6"
+  compile "JohnsonControls:jciTagDictionary:14.6"
+  compile "JohnsonControls:jciTools:14.6"
+  compile "JohnsonControls:jciViews:14.6"
+  compile "Tridium:neql-rt:4.6"
+  compile "Tridium:schedule-rt:4.6"
+  compile "Tridium:schedule-ux:4.6"
+  compile "Tridium:schedule-wb:4.6"
+  compile "Tridium:search-rt:4.6"
+  compile "Tridium:search-ux:4.6"
+  compile "Tridium:search-wb:4.6"
+  compile "Tridium:systemDb-rt:4.6"
+  compile "Tridium:systemIndex-rt:4.6"
+  compile "Tridium:systemMonitor-rt:4.6"
+  compile "Tridium:systemMonitor-wb:4.6"
+  compile "Tridium:tagdictionary-rt:4.6"
+  compile "Tridium:tagdictionary-wb:4.6"
+  compile "Tridium:template-rt:4.6"
+  compile "Tridium:template-wb:4.6"
+  compile "Tridium:wbutil-wb:4.6"
+  compile "Tridium:webEditors-ux:4.6"
+  compile "Tridium:workbench-wb:4.6"
+  compile project(":ResoluteTagUtils-rt")
+}
+
+moduleTestJar {
+  from('srcTest') {
+  }
+}

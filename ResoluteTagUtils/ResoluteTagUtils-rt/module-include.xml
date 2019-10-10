@@ -1,0 +1,11 @@
+<!-- Module Include File -->
+<!-- Types -->
+<types>
+  <!-- Type Example:<type name="MyClass" class="com.acme.BMyClass"/> -->
+  <!--com.resolute.ResoluteTagUtils.services-->
+  <!--com.resolute.ResoluteTagUtils.components-->
+  <type class="com.resolute.ResoluteTagUtils.components.BTagImporter" name="TagImporter"/>
+  <type class="com.resolute.ResoluteTagUtils.services.BResoluteTagUtils" name="ResoluteTagUtils"/>
+  <!--com.resolute.ResoluteTagUtils.jobs-->
+  <type class="com.resolute.ResoluteTagUtils.jobs.BTaggingJob" name="TaggingJob"/>
+</types>

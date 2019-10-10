@@ -1,0 +1,14 @@
+<!-- Module Include File -->
+<!-- Types -->
+<types>
+  <!-- Type Example:<type name="MyClass" class="com.acme.BMyClass"/> -->
+  <!--com.resolute.ResoluteTagUtils.ui-->
+  <!--com.resolute.ResoluteTagUtils.ui.views-->
+  <type class="com.resolute.ResoluteTagUtils.ui.views.BImportExportManager" name="ImportExportManager">
+    <agent default="true">
+      <on type="ResoluteTagUtils:ResoluteTagManager"/>
+    </agent>
+  </type>
+  <!--com.resolute.ResoluteTagUtils.ui.components-->
+  <type class="com.resolute.ResoluteTagUtils.ui.components.BImportButton" name="ImportButton"/>
+</types>
