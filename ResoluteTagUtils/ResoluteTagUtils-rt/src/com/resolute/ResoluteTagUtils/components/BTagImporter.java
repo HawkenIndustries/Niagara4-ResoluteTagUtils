@@ -210,7 +210,53 @@ public class BTagImporter extends BComponent {
 
   @Override
   public void atSteadyState(){
-      logger.fine("TagImporter...atSteadyState");
+
+    logger.fine("TagImporter...atSteadyState");
+
+    try{
+      BIFile file = (BIFile)getImportFile().get(Sys.getStation());
+      logger.info(file.getFilePath().toString().concat(" folder already present in the station..."));
+
+      String ord = getImportFile().encodeToString();
+      BOrd resDir = BOrd.make((ord.split("/"))[0]);
+      OrdQuery[] dirQueries = resDir.parse();
+      OrdQuery[] fileQueries = getImportFile().parse();
+      FilePath dp = (FilePath)dirQueries[dirQueries.length-1];
+      FilePath fp = (FilePath)fileQueries[fileQueries.length-1];
+      BIDirectory resoluteDir = (BIDirectory)resDir.get(Sys.getStation());
+      try{
+        logger.info("Checking for old tag import files in the Resolute folder...");
+        for(BIFile f: resoluteDir.listFiles()){
+          if(file.getFileName().equals("rbiTagImport.json")){
+            logger.warning("Found old copies of the tag import file in the Resolute folder...\nDeleting...");
+            logger.info(file.getFileName());
+            BFileSystem.INSTANCE.delete(fp, null);
+          }
+        }
+
+      }catch(IOException ioe){
+        logger.severe(ioe.getMessage());
+        ioe.printStackTrace();
+      }
+
+    }catch(UnresolvedException ue){
+
+      logger.warning(ue.getMessage());
+      logger.warning("Resolute folder not found...\nCreating...");
+
+      String ord = getImportFile().encodeToString();
+      BOrd resDir = BOrd.make((ord.split("/"))[0]);
+      OrdQuery[] dirQueries = resDir.parse();
+      FilePath dp = (FilePath)dirQueries[dirQueries.length-1];
+
+      try{
+        BIDirectory resoluteDir = BFileSystem.INSTANCE.makeDir(dp,null);
+        logger.info(resoluteDir.getNavName().concat(" created..."));
+      }catch(IOException ioe){
+        logger.severe(ioe.getMessage());
+        ioe.printStackTrace();
+      }
+    }
   }
 
   public void doTagIt(Context cx){
@@ -219,32 +265,4 @@ public class BTagImporter extends BComponent {
 
   public static BTagImporter make(){ return new BTagImporter(); }
 
-
-  private void deleteOldFiles(BOrd dirOrd){
-
-    BIFile resDir = (BIFile)dirOrd.get(this);
-    if(resDir.isDirectory()){
-      try{
-        BIDirectory dir = (BIDirectory)dirOrd.get(Sys.getStation());
-        logger.finer("checking resolute directory for old tag import files...");
-        for(BIFile file : dir.listFiles()){
-          logger.finer(file.getFileName());
-          if(file.getFileName().equals("tagImport")){
-            BFileSystem.INSTANCE.delete(file.getFilePath());
-            logger.finer("found old tag import file @ " + file.getFilePath().toString());
-            logger.finer("deleting old resolute tag import file...");
-            logger.finer("begin job...");
-          }
-        }
-      }catch(IOException ioe){
-        logger.severe(ioe.getMessage());
-        ioe.printStackTrace();
-      }catch(Exception e){
-        logger.severe(e.getMessage());
-        e.printStackTrace();
-      }
-    }else{
-      logger.warning("Found file named \"ResoluteImports\", but it is not a directory");
-    }
-  }
 }
