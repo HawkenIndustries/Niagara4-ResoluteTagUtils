@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module name="ResoluteTagUtils-rt" bajaVersion="0" vendor="com.resolute" vendorVersion="1.0" description="Utilities to perform out-of-band tag import / export and tagging ops." preferredSymbol="restu" nre="true" autoload="true" installable="true" buildMillis="1570818455296" buildHost="VictorSmolinski" moduleName="ResoluteTagUtils" runtimeProfile="rt">
+ <dependencies>
+  <dependency name="control-wb" vendor="Tridium" vendorVersion="4.6"/>
+  <dependency name="driver-ux" vendor="Tridium" vendorVersion="4.6"/>
+  <dependency name="bajaScript-ux" vendor="Tridium" vendorVersion="4.6"/>
+  <dependency name="systemDb-rt" vendor="Tridium" vendorVersion="4.6"/>
+  <dependency name="template-rt" vendor="Tridium" vendorVersion="4.6"/>
+  <dependency name="schedule-rt" vendor="Tridium" vendorVersion="4.6"/>
+  <dependency name="baja" vendor="Tridium" vendorVersion="4.6"/>
+  <dependency name="jciAutoImport" vendor="JohnsonControls" vendorVersion="14.6"/>
+  <dependency name="tagdictionary-rt" vendor="Tridium" vendorVersion="4.6"/>
+  <dependency name="hierarchy-rt" vendor="Tridium" vendorVersion="4.6"/>
+  <dependency name="control-rt" vendor="Tridium" vendorVersion="4.6"/>
+  <dependency name="aaphp-rt" vendor="Tridium" vendorVersion="4.6"/>
+  <dependency name="jciSpaces" vendor="JohnsonControls" vendorVersion="14.6"/>
+  <dependency name="gx-rt" vendor="Tridium" vendorVersion="4.6"/>
+  <dependency name="neql-rt" vendor="Tridium" vendorVersion="4.6"/>
+  <dependency name="webEditors-ux" vendor="Tridium" vendorVersion="4.6"/>
+  <dependency name="file-rt" vendor="Tridium" vendorVersion="4.6"/>
+  <dependency name="jciAutoExport" vendor="JohnsonControls" vendorVersion="14.6"/>
+  <dependency name="jciSupport" vendor="JohnsonControls" vendorVersion="14.6"/>
+  <dependency name="systemIndex-rt" vendor="Tridium" vendorVersion="4.6"/>
+  <dependency name="haystack-rt" vendor="Tridium" vendorVersion="4.6"/>
+  <dependency name="workbench-wb" vendor="Tridium" vendorVersion="4.6"/>
+  <dependency name="gx-wb" vendor="Tridium" vendorVersion="4.6"/>
+  <dependency name="driver-wb" vendor="Tridium" vendorVersion="4.6"/>
+  <dependency name="systemMonitor-rt" vendor="Tridium" vendorVersion="4.6"/>
+  <dependency name="driver-rt" vendor="Tridium" vendorVersion="4.6"/>
+  <dependency name="converters-rt" vendor="Tridium" vendorVersion="4.6"/>
+  <dependency name="bajaux-ux" vendor="Tridium" vendorVersion="4.6"/>
+  <dependency name="bajaui-wb" vendor="Tridium" vendorVersion="4.6"/>
+  <dependency name="control-ux" vendor="Tridium" vendorVersion="4.6"/>
+  <dependency name="jciTools" vendor="JohnsonControls" vendorVersion="14.6"/>
+  <dependency name="wbutil-wb" vendor="Tridium" vendorVersion="4.6"/>
+  <dependency name="kitPx-wb" vendor="Tridium" vendorVersion="4.6"/>
+  <dependency name="gx-ux" vendor="Tridium" vendorVersion="4.6"/>
+  <dependency name="bajaux-rt" vendor="Tridium" vendorVersion="4.6"/>
+  <dependency name="jciTagDictionary" vendor="JohnsonControls" vendorVersion="14.6"/>
+  <dependency name="search-rt" vendor="Tridium" vendorVersion="4.6"/>
+  <dependency name="entityIo-rt" vendor="Tridium" vendorVersion="4.6"/>
+  <dependency name="history-rt" vendor="Tridium" vendorVersion="4.6"/>
+ </dependencies>
+ <dirs/>
+ <types>
+  <type class="com.resolute.ResoluteTagUtils.components.BTagImporter" name="TagImporter"/>
+  <type class="com.resolute.ResoluteTagUtils.services.BResoluteTagUtils" name="ResoluteTagUtils"/>
+  <type class="com.resolute.ResoluteTagUtils.jobs.BTaggingJob" name="TaggingJob"/>
+ </types>
+ <permissions>
+  <niagara-permission-groups type="all"/>
+  <niagara-permission-groups type="workbench"/>
+  <niagara-permission-groups type="station">
+   <req-permission>
+    <name>MANAGE_EXECUTION</name>
+    <purposeKey>Smolinski</purposeKey>
+   </req-permission>
+   <req-permission>
+    <name>LOGGING</name>
+    <purposeKey>Smolinski</purposeKey>
+   </req-permission>
+   <req-permission>
+    <name>REFLECTION</name>
+    <purposeKey>Smolinski</purposeKey>
+   </req-permission>
+   <req-permission>
+    <name>UI</name>
+    <purposeKey>Smolinski</purposeKey>
+   </req-permission>
+   <req-permission>
+    <name>RUNTIME_EXECUTION</name>
+    <purposeKey>Smolinski</purposeKey>
+    <parameters>
+     <parameter name="files" value="*"/>
+    </parameters>
+   </req-permission>
+  </niagara-permission-groups>
+ </permissions>
+ <moduleParts>
+  <modulePart name="ResoluteTagUtils-ux" runtimeProfile="ux"/>
+  <modulePart name="ResoluteTagUtils-wb" runtimeProfile="wb"/>
+ </moduleParts>
+</module>

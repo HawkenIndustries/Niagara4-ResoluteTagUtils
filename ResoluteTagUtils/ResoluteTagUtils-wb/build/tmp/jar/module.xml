@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module name="ResoluteTagUtils-wb" bajaVersion="0" vendor="com.resolute" vendorVersion="1.0" description="Utilities to perform out-of-band tag import / export and tagging ops." preferredSymbol="restu" nre="true" autoload="true" installable="true" buildMillis="1570818227073" buildHost="VictorSmolinski" moduleName="ResoluteTagUtils" runtimeProfile="wb">
+ <dependencies>
+  <dependency name="bajaScript-ux" vendor="Tridium" vendorVersion="4.6"/>
+  <dependency name="systemDb-rt" vendor="Tridium" vendorVersion="4.6"/>
+  <dependency name="template-rt" vendor="Tridium" vendorVersion="4.6"/>
+  <dependency name="history-ux" vendor="Tridium" vendorVersion="4.6"/>
+  <dependency name="jciAutoTagging" vendor="JohnsonControls" vendorVersion="14.6"/>
+  <dependency name="tagdictionary-rt" vendor="Tridium" vendorVersion="4.6"/>
+  <dependency name="control-rt" vendor="Tridium" vendorVersion="4.6"/>
+  <dependency name="jciSpaces" vendor="JohnsonControls" vendorVersion="14.6"/>
+  <dependency name="neql-rt" vendor="Tridium" vendorVersion="4.6"/>
+  <dependency name="hierarchy-wb" vendor="Tridium" vendorVersion="4.6"/>
+  <dependency name="ResoluteTagUtils-rt" vendor="com.resolute" vendorVersion="1.0"/>
+  <dependency name="file-rt" vendor="Tridium" vendorVersion="4.6"/>
+  <dependency name="jciSupport" vendor="JohnsonControls" vendorVersion="14.6"/>
+  <dependency name="systemIndex-rt" vendor="Tridium" vendorVersion="4.6"/>
+  <dependency name="haystack-rt" vendor="Tridium" vendorVersion="4.6"/>
+  <dependency name="workbench-wb" vendor="Tridium" vendorVersion="4.6"/>
+  <dependency name="gx-wb" vendor="Tridium" vendorVersion="4.6"/>
+  <dependency name="search-ux" vendor="Tridium" vendorVersion="4.6"/>
+  <dependency name="driver-wb" vendor="Tridium" vendorVersion="4.6"/>
+  <dependency name="jciDictionary" vendor="JohnsonControls" vendorVersion="14.6"/>
+  <dependency name="systemMonitor-rt" vendor="Tridium" vendorVersion="4.6"/>
+  <dependency name="schedule-wb" vendor="Tridium" vendorVersion="4.6"/>
+  <dependency name="systemMonitor-wb" vendor="Tridium" vendorVersion="4.6"/>
+  <dependency name="converters-rt" vendor="Tridium" vendorVersion="4.6"/>
+  <dependency name="control-ux" vendor="Tridium" vendorVersion="4.6"/>
+  <dependency name="hierarchy-ux" vendor="Tridium" vendorVersion="4.6"/>
+  <dependency name="bajaui-wb" vendor="Tridium" vendorVersion="4.6"/>
+  <dependency name="jciTools" vendor="JohnsonControls" vendorVersion="14.6"/>
+  <dependency name="history-wb" vendor="Tridium" vendorVersion="4.6"/>
+  <dependency name="gx-ux" vendor="Tridium" vendorVersion="4.6"/>
+  <dependency name="bajaux-rt" vendor="Tridium" vendorVersion="4.6"/>
+  <dependency name="search-rt" vendor="Tridium" vendorVersion="4.6"/>
+  <dependency name="search-wb" vendor="Tridium" vendorVersion="4.6"/>
+  <dependency name="control-wb" vendor="Tridium" vendorVersion="4.6"/>
+  <dependency name="driver-ux" vendor="Tridium" vendorVersion="4.6"/>
+  <dependency name="schedule-rt" vendor="Tridium" vendorVersion="4.6"/>
+  <dependency name="baja" vendor="Tridium" vendorVersion="4.6"/>
+  <dependency name="jciAutoImport" vendor="JohnsonControls" vendorVersion="14.6"/>
+  <dependency name="tagdictionary-wb" vendor="Tridium" vendorVersion="4.6"/>
+  <dependency name="hierarchy-rt" vendor="Tridium" vendorVersion="4.6"/>
+  <dependency name="aaphp-rt" vendor="Tridium" vendorVersion="4.6"/>
+  <dependency name="jciViews" vendor="JohnsonControls" vendorVersion="14.6"/>
+  <dependency name="gx-rt" vendor="Tridium" vendorVersion="4.6"/>
+  <dependency name="webEditors-ux" vendor="Tridium" vendorVersion="4.6"/>
+  <dependency name="jciAutoExport" vendor="JohnsonControls" vendorVersion="14.6"/>
+  <dependency name="template-wb" vendor="Tridium" vendorVersion="4.6"/>
+  <dependency name="driver-rt" vendor="Tridium" vendorVersion="4.6"/>
+  <dependency name="schedule-ux" vendor="Tridium" vendorVersion="4.6"/>
+  <dependency name="bajaux-ux" vendor="Tridium" vendorVersion="4.6"/>
+  <dependency name="wbutil-wb" vendor="Tridium" vendorVersion="4.6"/>
+  <dependency name="kitPx-wb" vendor="Tridium" vendorVersion="4.6"/>
+  <dependency name="jciTagDictionary" vendor="JohnsonControls" vendorVersion="14.6"/>
+  <dependency name="entityIo-rt" vendor="Tridium" vendorVersion="4.6"/>
+  <dependency name="history-rt" vendor="Tridium" vendorVersion="4.6"/>
+ </dependencies>
+ <dirs/>
+ <types>
+  <type class="com.resolute.ResoluteTagUtils.ui.views.BImportExportManager" name="ImportExportManager">
+   <agent default="true">
+    <on type="ResoluteTagUtils:ResoluteTagManager"/>
+   </agent>
+  </type>
+  <type class="com.resolute.ResoluteTagUtils.ui.components.BImportButton" name="ImportButton"/>
+ </types>
+ <permissions>
+  <niagara-permission-groups type="all"/>
+  <niagara-permission-groups type="workbench"/>
+  <niagara-permission-groups type="station"/>
+ </permissions>
+</module>
