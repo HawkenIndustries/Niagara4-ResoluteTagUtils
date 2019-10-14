@@ -28,6 +28,7 @@ dependencies {
   compile "Tridium:bajaui-wb:4.6"
   compile "Tridium:bajaux-rt:4.6"
   compile "Tridium:bajaux-ux:4.6"
+  compile "Tridium:bql-rt:4.6"
   compile "Tridium:control-rt:4.6"
   compile "Tridium:control-ux:4.6"
   compile "Tridium:control-wb:4.6"
@@ -59,6 +60,7 @@ dependencies {
   compile "Tridium:tagdictionary-rt:4.6"
   compile "Tridium:template-rt:4.6"
   compile "Tridium:wbutil-wb:4.6"
+  compile "Tridium:web-rt:4.6"
   compile "Tridium:webEditors-ux:4.6"
   compile "Tridium:workbench-wb:4.6"
   uberjar 'com.google.code.gson:gson:2.8.5'
@@ -67,7 +69,14 @@ dependencies {
 
 jar{
   from("src"){
-    include '/rc/*.txt'
+    include '/res/**/*.txt'
+    include '/res/**/*.json'
+    include '/res/**/*.xml'
+    include '/res/**/*.js'
+    include '/res/**/*.html'
+    include '/res/**/*.css'
+    include '/res/**/*.png'
+    include '/res/**/*.svg'
   }doLast {
     apply from: "${rootDir}/gradle/signJar.gradle"
     tasks.withType(Exec) { Exec task ->

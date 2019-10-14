@@ -5,6 +5,14 @@
   <!--com.resolute.ResoluteTagUtils.services-->
   <!--com.resolute.ResoluteTagUtils.components-->
   <type class="com.resolute.ResoluteTagUtils.components.BTagImporter" name="TagImporter"/>
+  <type class="com.resolute.ResoluteTagUtils.components.BPoint" name="Point"/>
+  <type class="com.resolute.ResoluteTagUtils.components.BPointColumn" name="PointColumn"/>
+  <type class="com.resolute.ResoluteTagUtils.components.BPointColumnList" name="PointColumnList"/>
+  <type class="com.resolute.ResoluteTagUtils.components.BPointRow" name="PointRow"/>
+  <type class="com.resolute.ResoluteTagUtils.components.BPointTable" name="PointTable"/>
+  <type class="com.resolute.ResoluteTagUtils.components.BPointTableCursor" name="PointTableCursor"/>
+  <!--com.resolute.ResoluteTagUtils.ux.services-->
+  <type class="com.resolute.ResoluteTagUtils.ux.services.BFetchService" name="FetchService"/>
   <type class="com.resolute.ResoluteTagUtils.services.BResoluteTagUtils" name="ResoluteTagUtils"/>
   <!--com.resolute.ResoluteTagUtils.jobs-->
   <type class="com.resolute.ResoluteTagUtils.jobs.BTaggingJob" name="TaggingJob"/>

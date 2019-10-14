@@ -2,16 +2,9 @@ package com.resolute.ResoluteTagUtils.services;
 
 import com.resolute.ResoluteTagUtils.components.BTagImporter;
 
-import javax.baja.file.BFileSystem;
-import javax.baja.file.BIDirectory;
-import javax.baja.file.BIFile;
-import javax.baja.file.FilePath;
-import javax.baja.naming.BOrd;
-import javax.baja.naming.OrdQuery;
 import javax.baja.nre.annotations.NiagaraProperty;
 import javax.baja.nre.annotations.NiagaraType;
 import javax.baja.sys.*;
-import java.io.IOException;
 import java.util.logging.Logger;
 
 @NiagaraType
@@ -25,8 +18,8 @@ import java.util.logging.Logger;
 
 public class BResoluteTagUtils extends BAbstractService {
 /*+ ------------ BEGIN BAJA AUTO GENERATED CODE ------------ +*/
-/*@ $com.resolute.ResoluteTagUtils.services.BResoluteTagUtils(3842799873)1.0$ @*/
-/* Generated Thu Oct 10 16:38:43 EDT 2019 by Slot-o-Matic (c) Tridium, Inc. 2012 */
+/*@ $com.resolute.ResoluteTagUtils.services.BResoluteTagUtils(2544441235)1.0$ @*/
+/* Generated Sat Oct 12 12:27:20 EDT 2019 by Slot-o-Matic (c) Tridium, Inc. 2012 */
 
 ////////////////////////////////////////////////////////////////
 // Property "TagImporter"

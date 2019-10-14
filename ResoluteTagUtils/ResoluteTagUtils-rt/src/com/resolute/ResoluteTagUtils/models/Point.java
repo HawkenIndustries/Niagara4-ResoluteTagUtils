@@ -1,4 +1,4 @@
-package com.resolute.ResoluteTagUtils.components;
+package com.resolute.ResoluteTagUtils.models;
 
 public class Point {
 
@@ -26,5 +26,9 @@ public class Point {
 
     public void setTags(String[] tags) {
         this.tags = tags;
+    }
+
+    public Point as(Point pointClass){
+        return pointClass;
     }
 }

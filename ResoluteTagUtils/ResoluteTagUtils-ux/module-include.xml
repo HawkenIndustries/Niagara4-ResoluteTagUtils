@@ -1,8 +1,13 @@
 <!-- Module Include File -->
-
 <!-- Types -->
 <types>
-  <!-- Type Example:
-  <type name="MyClass" class="com.acme.BMyClass"/>
-  -->
+  <!-- Type Example:<type name="MyClass" class="com.acme.BMyClass"/> -->
+  <!--com.resolute.ResoluteTagUtils.ux.services-->
+  <type class="com.resolute.ResoluteTagUtils.ux.services.BFetchService" name="FetchService"/>
+  <!--com.resolute.ResoluteTagUtils.ux.views-->
+  <type class="com.resolute.ResoluteTagUtils.ux.views.BTagImportView" name="TagImportView">
+    <agent>
+      <on type="ResoluteTagUtils:TagImporter"/>
+    </agent>
+  </type>
 </types>

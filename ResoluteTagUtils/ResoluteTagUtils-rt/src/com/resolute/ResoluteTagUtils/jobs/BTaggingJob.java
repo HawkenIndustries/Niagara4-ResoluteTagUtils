@@ -5,8 +5,9 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
+import com.resolute.ResoluteTagUtils.components.BPointTable;
 import com.resolute.ResoluteTagUtils.components.BTagImporter;
-import com.resolute.ResoluteTagUtils.components.Point;
+import com.resolute.ResoluteTagUtils.models.Point;
 import com.resolute.ResoluteTagUtils.services.BResoluteTagUtils;
 
 import javax.baja.file.BIFile;
@@ -98,6 +99,15 @@ public class BTaggingJob extends BSimpleJob {
                     }
                     return null;
                 });
+
+        /***
+         * Pass the hashset to a baja table for the ui to display values...
+         */
+        if(points != null){
+            BPointTable table = BPointTable.make();
+            table.set(points);
+            tagImporter.setPointTable(table);
+        }
 
         /***
          * On-Demand implementation of the functional interface multvsearch.

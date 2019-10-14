@@ -52,7 +52,7 @@ import java.util.logging.Logger;
 public class BTagImporter extends BComponent {
 /*+ ------------ BEGIN BAJA AUTO GENERATED CODE ------------ +*/
 /*@ $com.resolute.ResoluteTagUtils.components.BTagImporter(3633830379)1.0$ @*/
-/* Generated Fri Oct 11 09:13:08 EDT 2019 by Slot-o-Matic (c) Tridium, Inc. 2012 */
+/* Generated Mon Oct 14 16:01:25 EDT 2019 by Slot-o-Matic (c) Tridium, Inc. 2012 */
 
 ////////////////////////////////////////////////////////////////
 // Property "importFile"
@@ -202,6 +202,12 @@ public class BTagImporter extends BComponent {
    ***/
 
   private static Logger logger = Logger.getLogger("Resolute Tag Utils");
+
+  private BPointTable pointTable;
+  public BPointTable getPointTable(){ return pointTable; }
+  public void setPointTable(BPointTable pointTable){
+    this.pointTable = pointTable;
+  }
 
   @Override
   public void started(){
