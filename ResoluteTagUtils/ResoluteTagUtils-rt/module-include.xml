@@ -12,8 +12,8 @@
   <type class="com.resolute.ResoluteTagUtils.components.BPointTable" name="PointTable"/>
   <type class="com.resolute.ResoluteTagUtils.components.BPointTableCursor" name="PointTableCursor"/>
   <!--com.resolute.ResoluteTagUtils.ux.services-->
-  <type class="com.resolute.ResoluteTagUtils.ux.services.BFetchService" name="FetchService"/>
   <type class="com.resolute.ResoluteTagUtils.services.BResoluteTagUtils" name="ResoluteTagUtils"/>
   <!--com.resolute.ResoluteTagUtils.jobs-->
   <type class="com.resolute.ResoluteTagUtils.jobs.BTaggingJob" name="TaggingJob"/>
+  <type class="com.resolute.ResoluteTagUtils.jobs.BBulkTagRemoveJob" name="BulkTagRemoveJob"/>
 </types>

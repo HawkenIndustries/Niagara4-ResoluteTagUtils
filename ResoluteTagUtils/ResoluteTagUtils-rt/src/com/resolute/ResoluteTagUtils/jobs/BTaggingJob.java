@@ -80,7 +80,7 @@ public class BTaggingJob extends BSimpleJob {
 
                         HashSet<Point> pointList = new HashSet<>();
                         JsonArray jsonPoints = json.get("points").getAsJsonArray();
-                        jsonPoints.forEach( p ->{
+                        jsonPoints.forEach( p -> {
                             String pstr = gson.toJson(p.getAsJsonObject());
                             pointList.add(gson.fromJson(pstr, Point.class));
                         });
@@ -117,7 +117,7 @@ public class BTaggingJob extends BSimpleJob {
 
         Collection<TagDictionary> tagDictionaries = tagDictionaryService.getTagDictionaries();
 
-        multvsearch searcher = (TagInfo tagInfo, HashSet<Point> pointList) -> {
+        multvsearch tagger = (TagInfo tagInfo, HashSet<Point> pointList) -> {
             log().message("dictionary tag: ".concat(tagInfo.getName()));
             pointList.forEach(point -> {
                 log().message("Resolute Point: ".concat(point.getName()));
@@ -151,7 +151,7 @@ public class BTaggingJob extends BSimpleJob {
                 if(!points.isEmpty()){
                     Iterator<TagInfo> tagInfoIterator = tagDictionary.getTags();
                     tagInfoIterator.forEachRemaining(tagInfo -> {
-                        searcher.search(tagInfo, points);
+                        tagger.tag(tagInfo, points);
                     });
                 }else{
                     log().message("Parsed empty list out of json file...");
@@ -167,5 +167,5 @@ public class BTaggingJob extends BSimpleJob {
     }
 
     @FunctionalInterface
-    interface multvsearch { void search(TagInfo tagInfo, HashSet<Point> points); }
+    interface multvsearch { void tag(TagInfo tagInfo, HashSet<Point> points); }
 }

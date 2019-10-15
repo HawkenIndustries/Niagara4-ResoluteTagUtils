@@ -1,5 +1,6 @@
 package com.resolute.ResoluteTagUtils.components;
 
+import com.resolute.ResoluteTagUtils.jobs.BBulkTagRemoveJob;
 import com.resolute.ResoluteTagUtils.jobs.BTaggingJob;
 
 import javax.baja.file.BFileSystem;
@@ -44,15 +45,34 @@ import java.util.logging.Logger;
         defaultValue = "BDouble.make(0.0)"
 )
 
+@NiagaraProperty(
+        name = "tagFilter",
+        type = "baja:String",
+        defaultValue = "BString.make(\"\")",
+        flags = Flags.SUMMARY | Flags.OPERATOR
+)
+
 @NiagaraAction(
         name = "tagIt",
         flags = Flags.OPERATOR | Flags.SUMMARY
 )
 
+@NiagaraAction(
+        name = "removeIt",
+        parameterType = "baja:String",
+        defaultValue = "BString.make(\"\")",
+        flags = Flags.SUMMARY | Flags.OPERATOR
+)
+
+@NiagaraAction(
+        name = "fetchIt",
+        flags = Flags.OPERATOR | Flags.SUMMARY
+)
+
 public class BTagImporter extends BComponent {
 /*+ ------------ BEGIN BAJA AUTO GENERATED CODE ------------ +*/
-/*@ $com.resolute.ResoluteTagUtils.components.BTagImporter(3633830379)1.0$ @*/
-/* Generated Mon Oct 14 16:01:25 EDT 2019 by Slot-o-Matic (c) Tridium, Inc. 2012 */
+/*@ $com.resolute.ResoluteTagUtils.components.BTagImporter(3955188987)1.0$ @*/
+/* Generated Tue Oct 15 12:15:45 EDT 2019 by Slot-o-Matic (c) Tridium, Inc. 2012 */
 
 ////////////////////////////////////////////////////////////////
 // Property "importFile"
@@ -124,6 +144,29 @@ public class BTagImporter extends BComponent {
   public void setJsonVersion(double v) { setDouble(jsonVersion, v, null); }
 
 ////////////////////////////////////////////////////////////////
+// Property "tagFilter"
+////////////////////////////////////////////////////////////////
+  
+  /**
+   * Slot for the {@code tagFilter} property.
+   * @see #getTagFilter
+   * @see #setTagFilter
+   */
+  public static final Property tagFilter = newProperty(Flags.SUMMARY | Flags.OPERATOR, BString.make(""), null);
+  
+  /**
+   * Get the {@code tagFilter} property.
+   * @see #tagFilter
+   */
+  public String getTagFilter() { return getString(tagFilter); }
+  
+  /**
+   * Set the {@code tagFilter} property.
+   * @see #tagFilter
+   */
+  public void setTagFilter(String v) { setString(tagFilter, v, null); }
+
+////////////////////////////////////////////////////////////////
 // Action "tagIt"
 ////////////////////////////////////////////////////////////////
   
@@ -138,6 +181,38 @@ public class BTagImporter extends BComponent {
    * @see #tagIt
    */
   public void tagIt() { invoke(tagIt, null, null); }
+
+////////////////////////////////////////////////////////////////
+// Action "removeIt"
+////////////////////////////////////////////////////////////////
+  
+  /**
+   * Slot for the {@code removeIt} action.
+   * @see #removeIt(BString parameter)
+   */
+  public static final Action removeIt = newAction(Flags.SUMMARY | Flags.OPERATOR, BString.make(""), null);
+  
+  /**
+   * Invoke the {@code removeIt} action.
+   * @see #removeIt
+   */
+  public void removeIt(BString parameter) { invoke(removeIt, parameter, null); }
+
+////////////////////////////////////////////////////////////////
+// Action "fetchIt"
+////////////////////////////////////////////////////////////////
+  
+  /**
+   * Slot for the {@code fetchIt} action.
+   * @see #fetchIt()
+   */
+  public static final Action fetchIt = newAction(Flags.OPERATOR | Flags.SUMMARY, null);
+  
+  /**
+   * Invoke the {@code fetchIt} action.
+   * @see #fetchIt
+   */
+  public void fetchIt() { invoke(fetchIt, null, null); }
 
 ////////////////////////////////////////////////////////////////
 // Type
@@ -266,9 +341,33 @@ public class BTagImporter extends BComponent {
   }
 
   public void doTagIt(Context cx){
-      BJobService.getService().submit(new BTaggingJob(), cx);
+    BJobService.getService().submit(new BTaggingJob(), cx);
   }
 
-  public static BTagImporter make(){ return new BTagImporter(); }
+  public void doRemoveIt(BString filter, Context cx){
+    if(!filter.getString().isEmpty()){
+      try{
+        setTagFilter(filter.encodeToString());
+        BJobService.getService().submit(new BBulkTagRemoveJob(), cx);
+      }catch(IOException ioe){
+        logger.severe(ioe.getMessage());
+        ioe.printStackTrace();
+      }
 
+    }else{
+      NullPointerException npe = new NullPointerException();
+      logger.severe("[Bulk Tag Remove Op Error] - Tag filter field can't be empty...! "
+              + npe.getMessage());
+      throw npe;
+    }
+  }
+
+  public void doFetchIt(){
+    //TODO implement fetch import file op from different sources...
+    logger.info("fetch feature under development...");
+  }
+
+  public static BTagImporter make(){
+    return new BTagImporter();
+  }
 }
