@@ -24,10 +24,10 @@ import javax.baja.tag.TagInfo;
 import java.io.IOException;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
+import java.util.*;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @NiagaraType
 
@@ -52,53 +52,19 @@ public class BTaggingJob extends BSimpleJob {
             .setPrettyPrinting()
             .create();
 
+    /***
+     *
+     * @param cx
+     * @throws Exception
+     */
     @Override
     public void run(Context cx) throws Exception {
 
+        BTagImporter tagImporter = ((BResoluteTagUtils)Sys.getService(BResoluteTagUtils.TYPE)).getTagImporter();
         TagDictionaryService tagDictionaryService = Sys.getStation().getTagDictionaryService();
-
-        BTagImporter tagImporter =
-                ((BResoluteTagUtils)Sys.getService(BResoluteTagUtils.TYPE)).getTagImporter();
-
-        HashSet<Point> points = AccessController.doPrivileged(
-                (PrivilegedAction<HashSet<Point>>)() -> {
-                    try {
-                        JsonObject json = gson.fromJson( new String(
-                                ((BIFile)tagImporter.getImportFile().get(this))
-                                        .read()) , JsonObject.class);
-
-                        /***
-                         * pass primitives right to parent component as properties.
-                         */
-                        tagImporter.setJsonVersion(json.get("version").getAsDouble());
-                        JsonArray currentTagSet = json.get("currentTagSet").getAsJsonArray();
-                        StringBuilder sb = new StringBuilder();
-                        currentTagSet.forEach( tag -> {
-                            sb.append(tag);
-                        });
-                        tagImporter.setTags(sb.toString());
-
-                        HashSet<Point> pointList = new HashSet<>();
-                        JsonArray jsonPoints = json.get("points").getAsJsonArray();
-                        jsonPoints.forEach( p -> {
-                            String pstr = gson.toJson(p.getAsJsonObject());
-                            pointList.add(gson.fromJson(pstr, Point.class));
-                        });
-                        return pointList;
-
-                    } catch (IOException ioe) {
-                        logger.severe(ioe.getMessage());
-                        log().message(ioe.getMessage());
-                        ioe.printStackTrace();
-                    } catch(UnresolvedException ue){
-                        logger.severe(ue.getMessage());
-                        log().message(ue.getMessage());
-                    } catch(Exception e){
-                        logger.severe(e.getMessage());
-                        e.printStackTrace();
-                    }
-                    return null;
-                });
+        Collection<TagDictionary> tagDictionaries = tagDictionaryService.getTagDictionaries();
+        String rawFilter = tagImporter.getDictionaryFilter();
+        HashSet<Point> points = getPoints(tagImporter);
 
         /***
          * Pass the hashset to a baja table for the ui to display values...
@@ -114,44 +80,81 @@ public class BTaggingJob extends BSimpleJob {
          * Iterates over all tags in every dictionary, checking every rbi tag
          * for every rbi point in the list.
          */
+        if(rawFilter.isEmpty()){
+            logger.severe("[Bulk Tagging Async Job ERROR] - dictionaryFilter field is empty, canceling job...!");
+            this.cancel();
+        }else{
+            if(rawFilter.equals("*")){
+                tagOp(points, tagDictionaries);
+            }else{
+                String[] filter = tagImporter.getDictionaryFilter().split(",");
+                tagOp(points, filterDicionaries(filter, tagDictionaries));
+            }
+        }
+    }
 
-        Collection<TagDictionary> tagDictionaries = tagDictionaryService.getTagDictionaries();
+    /***
+     *
+     * @param filter
+     * @param tagDictionaries
+     * @return
+     */
+    private Collection<TagDictionary> filterDicionaries(String[] filter, Collection<TagDictionary> tagDictionaries) {
 
-        multvsearch tagger = (TagInfo tagInfo, HashSet<Point> pointList) -> {
-            log().message("dictionary tag: ".concat(tagInfo.getName()));
-            pointList.forEach(point -> {
-                log().message("Resolute Point: ".concat(point.getName()));
-                for(String tag:point.getTags()){
-                    log().message("Resolute Tag: ".concat(tag));
-                    if(tagInfo.getName().equals(tag)){
-                        try{
-                            log().message("\t\tFound Matching Tag...!!!");
-                            String relPath = "slot:".concat(
-                                    (point.getMetricId().split("\\."))[1] );
-                            BOrd ord = BOrd.make(SlotPath.unescape(relPath));
-                            tagInfo.setTagOn((BComponent) ord.get(Sys.getStation()));
+        Collection<TagDictionary> finalDictList = null;
+        for(String f : filter){
+            finalDictList = tagDictionaries
+                    .stream()
+                    .filter(tagDictionary -> tagDictionary
+                            .getDisplayName(null)
+                            .equals(f)).collect(Collectors.toSet());
+        }
+        return finalDictList;
+    }
 
-                        }catch(UnresolvedException ue){
-                            log().message(ue.getMessage());
-                            logger.severe(ue.getMessage());
-                        }
-                    }
-                }
-            });
-        };
-
-        log().message("Dictionaries found: ");
-
+    /***
+     *
+     * @param pointList
+     * @param tagDictionaries
+     */
+    private void tagOp(HashSet<Point> pointList,
+                       Collection<TagDictionary> tagDictionaries) {
         for (TagDictionary tagDictionary : tagDictionaries) {
             final String msg = tagDictionary.getDisplayName(null);
             log().message(msg);
-            logger.info(msg);
+            logger.fine(msg);
 
-            if(points != null){
-                if(!points.isEmpty()){
+            if(pointList != null){
+                if(!pointList.isEmpty()){
                     Iterator<TagInfo> tagInfoIterator = tagDictionary.getTags();
                     tagInfoIterator.forEachRemaining(tagInfo -> {
-                        tagger.tag(tagInfo, points);
+
+                        log().message("dictionary tag: ".concat(tagInfo.getName()));
+
+                        pointList.forEach(point -> {
+                            log().message("Resolute Point: ".concat(point.getName()));
+                            log().message("Dictionaries found: ");
+                            logger.fine("Resolute Point: ".concat(point.getName()));
+
+                            for(String tag:point.getTags()){
+                                log().message("Resolute Tag: ".concat(tag));
+                                logger.fine("\t\tResolute Tag".concat(tag));
+
+                                if(tagInfo.getName().equals(tag)){
+                                    try{
+                                        log().message("\t\tFound Matching Tag...!!!");
+                                        String relPath = "slot:".concat(
+                                                (point.getMetricId().split("\\."))[1] );
+                                        BOrd ord = BOrd.make(SlotPath.unescape(relPath));
+                                        tagInfo.setTagOn((BComponent) ord.get(Sys.getStation()));
+
+                                    }catch(UnresolvedException ue){
+                                        log().message(ue.getMessage());
+                                        logger.severe(ue.getMessage());
+                                    }
+                                }
+                            }
+                        });
                     });
                 }else{
                     log().message("Parsed empty list out of json file...");
@@ -161,11 +164,53 @@ public class BTaggingJob extends BSimpleJob {
                 log().message("Parsed a null list out of json file...!!!");
                 logger.severe("Parsed a null list out of json file...!!!");
             }
-
         }
-
     }
 
-    @FunctionalInterface
-    interface multvsearch { void tag(TagInfo tagInfo, HashSet<Point> points); }
+    /***
+     *
+     * @param tagImporter
+     * @return
+     */
+    private HashSet<Point> getPoints(BTagImporter tagImporter){
+        return AccessController.doPrivileged(
+            (PrivilegedAction<HashSet<Point>>)() -> {
+                try {
+                    JsonObject json = gson.fromJson( new String(
+                            ((BIFile)tagImporter.getImportFile().get(this))
+                                    .read()) , JsonObject.class);
+
+                    /***
+                     * pass primitives right to parent component as properties.
+                     */
+                    tagImporter.setJsonVersion(json.get("version").getAsDouble());
+                    JsonArray currentTagSet = json.get("currentTagSet").getAsJsonArray();
+                    StringBuilder sb = new StringBuilder();
+                    currentTagSet.forEach( tag -> {
+                        sb.append(tag);
+                    });
+                    tagImporter.setTags(sb.toString());
+
+                    HashSet<Point> pointList = new HashSet<>();
+                    JsonArray jsonPoints = json.get("points").getAsJsonArray();
+                    jsonPoints.forEach( p -> {
+                        String pstr = gson.toJson(p.getAsJsonObject());
+                        pointList.add(gson.fromJson(pstr, Point.class));
+                    });
+                    return pointList;
+
+                } catch (IOException ioe) {
+                    logger.severe(ioe.getMessage());
+                    log().message(ioe.getMessage());
+                    ioe.printStackTrace();
+                } catch(UnresolvedException ue){
+                    logger.severe(ue.getMessage());
+                    log().message(ue.getMessage());
+                } catch(Exception e){
+                    logger.severe(e.getMessage());
+                    e.printStackTrace();
+                }
+                return null;
+            });
+    }
 }

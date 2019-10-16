@@ -58,7 +58,7 @@ public class BBulkTagRemoveJob extends BSimpleJob {
                     String msg = "Removed ".concat(tag.getId().getQName()) +
                             " - ".concat(String.valueOf(removed));
                     log().message(msg);
-                    logger.info(msg);
+                    logger.fine(msg);
                 });
             }else{
                 for(String f : filter){
@@ -71,11 +71,11 @@ public class BBulkTagRemoveJob extends BSimpleJob {
                                         "\n\t\tfrom ".concat(point.getName() +
                                                         "\n\t\tfiltered by ".concat(f) +
                                                         "\n\t\t".concat(String.valueOf(removed)));
-                                logger.info(msg);
+                                logger.fine(msg);
                                 log().message(msg);
                             });
                     String msg = "Removed tag? ".concat(String.valueOf(removed));
-                    logger.info(msg);
+                    logger.fine(msg);
                     log().message(msg);
 
                 }
@@ -90,7 +90,7 @@ public class BBulkTagRemoveJob extends BSimpleJob {
                 String[] filter = tagImporter.getTagFilter().split(",");
                 String msg = point.getName() + tagImporter.getTagFilter();
                 remover.remove(filter, point);
-                logger.info(msg);
+                logger.fine(msg);
                 log().message(msg);
             });
         }

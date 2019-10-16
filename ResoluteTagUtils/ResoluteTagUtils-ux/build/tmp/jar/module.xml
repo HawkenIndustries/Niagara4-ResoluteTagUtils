@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<module name="ResoluteTagUtils-ux" bajaVersion="0" vendor="com.resolute" vendorVersion="1.0" description="Utilities to perform out-of-band tag import / export and tagging ops." preferredSymbol="restu" nre="true" autoload="true" installable="true" buildMillis="1571084168100" buildHost="VictorSmolinski" moduleName="ResoluteTagUtils" runtimeProfile="ux">
+<module name="ResoluteTagUtils-ux" bajaVersion="0" vendor="com.resolute" vendorVersion="1.0" description="Utilities to perform out-of-band tag import / export and tagging ops." preferredSymbol="restu" nre="true" autoload="true" installable="true" buildMillis="1571236322391" buildHost="VictorSmolinski" moduleName="ResoluteTagUtils" runtimeProfile="ux">
  <dependencies>
   <dependency name="bajaScript-ux" vendor="Tridium" vendorVersion="4.6"/>
   <dependency name="systemDb-rt" vendor="Tridium" vendorVersion="4.6"/>

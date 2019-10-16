@@ -49,11 +49,20 @@ import java.util.logging.Logger;
         name = "tagFilter",
         type = "baja:String",
         defaultValue = "BString.make(\"\")",
-        flags = Flags.SUMMARY | Flags.OPERATOR
+        flags = Flags.HIDDEN | Flags.OPERATOR
+)
+
+@NiagaraProperty(
+        name = "dictionaryFilter",
+        type = "baja:String",
+        defaultValue = "BString.make(\"\")",
+        flags = Flags.HIDDEN | Flags.OPERATOR
 )
 
 @NiagaraAction(
         name = "tagIt",
+        parameterType = "baja:String",
+        defaultValue = "BString.make(\"\")",
         flags = Flags.OPERATOR | Flags.SUMMARY
 )
 
@@ -71,8 +80,8 @@ import java.util.logging.Logger;
 
 public class BTagImporter extends BComponent {
 /*+ ------------ BEGIN BAJA AUTO GENERATED CODE ------------ +*/
-/*@ $com.resolute.ResoluteTagUtils.components.BTagImporter(3955188987)1.0$ @*/
-/* Generated Tue Oct 15 12:15:45 EDT 2019 by Slot-o-Matic (c) Tridium, Inc. 2012 */
+/*@ $com.resolute.ResoluteTagUtils.components.BTagImporter(714579587)1.0$ @*/
+/* Generated Tue Oct 15 18:09:49 EDT 2019 by Slot-o-Matic (c) Tridium, Inc. 2012 */
 
 ////////////////////////////////////////////////////////////////
 // Property "importFile"
@@ -152,7 +161,7 @@ public class BTagImporter extends BComponent {
    * @see #getTagFilter
    * @see #setTagFilter
    */
-  public static final Property tagFilter = newProperty(Flags.SUMMARY | Flags.OPERATOR, BString.make(""), null);
+  public static final Property tagFilter = newProperty(Flags.HIDDEN | Flags.OPERATOR, BString.make(""), null);
   
   /**
    * Get the {@code tagFilter} property.
@@ -167,20 +176,43 @@ public class BTagImporter extends BComponent {
   public void setTagFilter(String v) { setString(tagFilter, v, null); }
 
 ////////////////////////////////////////////////////////////////
+// Property "dictionaryFilter"
+////////////////////////////////////////////////////////////////
+  
+  /**
+   * Slot for the {@code dictionaryFilter} property.
+   * @see #getDictionaryFilter
+   * @see #setDictionaryFilter
+   */
+  public static final Property dictionaryFilter = newProperty(Flags.HIDDEN | Flags.OPERATOR, BString.make(""), null);
+  
+  /**
+   * Get the {@code dictionaryFilter} property.
+   * @see #dictionaryFilter
+   */
+  public String getDictionaryFilter() { return getString(dictionaryFilter); }
+  
+  /**
+   * Set the {@code dictionaryFilter} property.
+   * @see #dictionaryFilter
+   */
+  public void setDictionaryFilter(String v) { setString(dictionaryFilter, v, null); }
+
+////////////////////////////////////////////////////////////////
 // Action "tagIt"
 ////////////////////////////////////////////////////////////////
   
   /**
    * Slot for the {@code tagIt} action.
-   * @see #tagIt()
+   * @see #tagIt(BString parameter)
    */
-  public static final Action tagIt = newAction(Flags.OPERATOR | Flags.SUMMARY, null);
+  public static final Action tagIt = newAction(Flags.OPERATOR | Flags.SUMMARY, BString.make(""), null);
   
   /**
    * Invoke the {@code tagIt} action.
    * @see #tagIt
    */
-  public void tagIt() { invoke(tagIt, null, null); }
+  public void tagIt(BString parameter) { invoke(tagIt, parameter, null); }
 
 ////////////////////////////////////////////////////////////////
 // Action "removeIt"
@@ -340,8 +372,21 @@ public class BTagImporter extends BComponent {
     }
   }
 
-  public void doTagIt(Context cx){
-    BJobService.getService().submit(new BTaggingJob(), cx);
+  public void doTagIt(BString filter, Context cx){
+    if(!filter.getString().isEmpty()){
+      try{
+        setDictionaryFilter(filter.encodeToString());
+        BJobService.getService().submit(new BTaggingJob(), cx);
+      }catch(IOException ioe){
+        logger.severe(ioe.getMessage());
+        ioe.printStackTrace();
+      }
+    }else{
+      NullPointerException npe = new NullPointerException();
+      logger.severe("[Bulk Tag Remove Op Error] - Tag filter field can't be empty...! "
+              + npe.getMessage());
+      throw npe;
+    }
   }
 
   public void doRemoveIt(BString filter, Context cx){
