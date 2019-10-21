@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<module name="ResoluteTagUtils-rt" bajaVersion="0" vendor="com.resolute" vendorVersion="1.0" description="Utilities to perform out-of-band tag import / export and tagging ops." preferredSymbol="restu" nre="true" autoload="true" installable="true" buildMillis="1571237173799" buildHost="VictorSmolinski" moduleName="ResoluteTagUtils" runtimeProfile="rt">
+<module name="ResoluteTagUtils-rt" bajaVersion="0" vendor="com.resolute" vendorVersion="1.0" description="Utilities to perform out-of-band tag import / export and tagging ops." preferredSymbol="restu" nre="true" autoload="true" installable="true" buildMillis="1571691411502" buildHost="VictorSmolinski" moduleName="ResoluteTagUtils" runtimeProfile="rt">
  <dependencies>
   <dependency name="control-wb" vendor="Tridium" vendorVersion="4.6"/>
   <dependency name="driver-ux" vendor="Tridium" vendorVersion="4.6"/>
@@ -55,11 +55,21 @@
   <type class="com.resolute.ResoluteTagUtils.services.BResoluteTagUtils" name="ResoluteTagUtils"/>
   <type class="com.resolute.ResoluteTagUtils.jobs.BTaggingJob" name="TaggingJob"/>
   <type class="com.resolute.ResoluteTagUtils.jobs.BBulkTagRemoveJob" name="BulkTagRemoveJob"/>
+  <type class="com.resolute.ResoluteTagUtils.jobs.BFetchJob" name="FetchJob"/>
  </types>
  <permissions>
   <niagara-permission-groups type="all"/>
   <niagara-permission-groups type="workbench"/>
   <niagara-permission-groups type="station">
+   <req-permission>
+    <name>NETWORK_COMMUNICATION</name>
+    <purposeKey>Smolinski.</purposeKey>
+    <parameters>
+     <parameter name="hosts" value="localhost"/>
+     <parameter name="ports" value="1880"/>
+     <parameter name="type" value="all"/>
+    </parameters>
+   </req-permission>
    <req-permission>
     <name>MANAGE_EXECUTION</name>
     <purposeKey>Smolinski</purposeKey>

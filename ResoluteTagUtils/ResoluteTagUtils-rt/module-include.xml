@@ -16,4 +16,5 @@
   <!--com.resolute.ResoluteTagUtils.jobs-->
   <type class="com.resolute.ResoluteTagUtils.jobs.BTaggingJob" name="TaggingJob"/>
   <type class="com.resolute.ResoluteTagUtils.jobs.BBulkTagRemoveJob" name="BulkTagRemoveJob"/>
+  <type class="com.resolute.ResoluteTagUtils.jobs.BFetchJob" name="FetchJob"/>
 </types>

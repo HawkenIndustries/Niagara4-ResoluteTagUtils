@@ -1,6 +1,7 @@
 package com.resolute.ResoluteTagUtils.components;
 
 import com.resolute.ResoluteTagUtils.jobs.BBulkTagRemoveJob;
+import com.resolute.ResoluteTagUtils.jobs.BFetchJob;
 import com.resolute.ResoluteTagUtils.jobs.BTaggingJob;
 
 import javax.baja.file.BFileSystem;
@@ -25,11 +26,11 @@ import java.util.logging.Logger;
 @NiagaraProperty(
         name = "importFile",
         type = "baja:Ord",
-        defaultValue = "BOrd.make(\"file:^ResoluteImports/tagImport.json\")",
+        defaultValue = "BOrd.make(\"file:^ResoluteImports/rbiTagImport.json\")",
         facets = {
                 @Facet(name = "BFacets.TARGET_TYPE", value = "\"baja:IFile\"")
         },
-        flags = Flags.OPERATOR | Flags.SUMMARY
+        flags = Flags.HIDDEN
 )
 
 @NiagaraProperty(
@@ -80,8 +81,8 @@ import java.util.logging.Logger;
 
 public class BTagImporter extends BComponent {
 /*+ ------------ BEGIN BAJA AUTO GENERATED CODE ------------ +*/
-/*@ $com.resolute.ResoluteTagUtils.components.BTagImporter(714579587)1.0$ @*/
-/* Generated Tue Oct 15 18:09:49 EDT 2019 by Slot-o-Matic (c) Tridium, Inc. 2012 */
+/*@ $com.resolute.ResoluteTagUtils.components.BTagImporter(1133203628)1.0$ @*/
+/* Generated Mon Oct 21 16:55:53 EDT 2019 by Slot-o-Matic (c) Tridium, Inc. 2012 */
 
 ////////////////////////////////////////////////////////////////
 // Property "importFile"
@@ -92,7 +93,7 @@ public class BTagImporter extends BComponent {
    * @see #getImportFile
    * @see #setImportFile
    */
-  public static final Property importFile = newProperty(Flags.OPERATOR | Flags.SUMMARY, BOrd.make("file:^ResoluteImports/tagImport.json"), BFacets.make(BFacets.TARGET_TYPE, "baja:IFile"));
+  public static final Property importFile = newProperty(Flags.HIDDEN, BOrd.make("file:^ResoluteImports/rbiTagImport.json"), BFacets.make(BFacets.TARGET_TYPE, "baja:IFile"));
   
   /**
    * Get the {@code importFile} property.
@@ -325,22 +326,20 @@ public class BTagImporter extends BComponent {
   public void atSteadyState(){
 
     logger.fine("TagImporter...atSteadyState");
-
+    setImportFile(BOrd.make("file:^ResoluteImports/rbiTagImport.json"));
     try{
       BIFile file = (BIFile)getImportFile().get(Sys.getStation());
       logger.info(file.getFilePath().toString().concat(" folder already present in the station..."));
 
       String ord = getImportFile().encodeToString();
       BOrd resDir = BOrd.make((ord.split("/"))[0]);
-      OrdQuery[] dirQueries = resDir.parse();
       OrdQuery[] fileQueries = getImportFile().parse();
-      FilePath dp = (FilePath)dirQueries[dirQueries.length-1];
       FilePath fp = (FilePath)fileQueries[fileQueries.length-1];
       BIDirectory resoluteDir = (BIDirectory)resDir.get(Sys.getStation());
       try{
         logger.info("Checking for old tag import files in the Resolute folder...");
         for(BIFile f: resoluteDir.listFiles()){
-          if(file.getFileName().equals("rbiTagImport.json")){
+          if(f.getFileName().equals(file.getFileName())){
             logger.warning("Found old copies of the tag import file in the Resolute folder...\nDeleting...");
             logger.info(file.getFileName());
             BFileSystem.INSTANCE.delete(fp, null);
@@ -407,9 +406,8 @@ public class BTagImporter extends BComponent {
     }
   }
 
-  public void doFetchIt(){
-    //TODO implement fetch import file op from different sources...
-    logger.info("fetch feature under development...");
+  public void doFetchIt(Context cx){
+    BJobService.getService().submit(new BFetchJob(), cx);
   }
 
   public static BTagImporter make(){

@@ -8,6 +8,16 @@
   <niagara-permission-groups type="station">
 
     <req-permission>
+      <name>NETWORK_COMMUNICATION</name>
+      <purposeKey>Smolinski.</purposeKey>
+      <parameters>
+        <parameter name='hosts' value='localhost'></parameter>
+        <parameter name='ports' value='1880'></parameter>
+        <parameter name='type' value='all'></parameter>
+      </parameters>
+    </req-permission>
+
+    <req-permission>
       <name>MANAGE_EXECUTION</name>
       <purposeKey>Smolinski</purposeKey>
     </req-permission>

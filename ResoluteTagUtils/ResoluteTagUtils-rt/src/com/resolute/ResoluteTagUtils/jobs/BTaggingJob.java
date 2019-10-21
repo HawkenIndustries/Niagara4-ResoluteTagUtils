@@ -60,7 +60,8 @@ public class BTaggingJob extends BSimpleJob {
     @Override
     public void run(Context cx) throws Exception {
 
-        BTagImporter tagImporter = ((BResoluteTagUtils)Sys.getService(BResoluteTagUtils.TYPE)).getTagImporter();
+        BTagImporter tagImporter =
+                ((BResoluteTagUtils)Sys.getService(BResoluteTagUtils.TYPE)).getTagImporter();
         TagDictionaryService tagDictionaryService = Sys.getStation().getTagDictionaryService();
         Collection<TagDictionary> tagDictionaries = tagDictionaryService.getTagDictionaries();
         String rawFilter = tagImporter.getDictionaryFilter();
