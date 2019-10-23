@@ -27,7 +27,6 @@ import java.security.PrivilegedAction;
 import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @NiagaraType
 
@@ -64,8 +63,10 @@ public class BTaggingJob extends BSimpleJob {
                 ((BResoluteTagUtils)Sys.getService(BResoluteTagUtils.TYPE)).getTagImporter();
         TagDictionaryService tagDictionaryService = Sys.getStation().getTagDictionaryService();
         Collection<TagDictionary> tagDictionaries = tagDictionaryService.getTagDictionaries();
-        String rawFilter = tagImporter.getDictionaryFilter();
+        String rawFilter = tagImporter.getTaggingFilter();
         HashSet<Point> points = getPoints(tagImporter);
+
+        tagImporter.setIsJobRunning(true);
 
         /***
          * Pass the hashset to a baja table for the ui to display values...
@@ -88,10 +89,11 @@ public class BTaggingJob extends BSimpleJob {
             if(rawFilter.equals("*")){
                 tagOp(points, tagDictionaries);
             }else{
-                String[] filter = tagImporter.getDictionaryFilter().split(",");
+                String[] filter = tagImporter.getTaggingFilter().split(",");
                 tagOp(points, filterDicionaries(filter, tagDictionaries));
             }
         }
+        tagImporter.setIsJobRunning(false);
     }
 
     /***
@@ -143,7 +145,7 @@ public class BTaggingJob extends BSimpleJob {
 
                                 if(tagInfo.getName().equals(tag)){
                                     try{
-                                        log().message("\t\tFound Matching Tag...!!!");
+                                        log().message("Found Matching Tag...!!!");
                                         String relPath = "slot:".concat(
                                                 (point.getMetricId().split("\\."))[1] );
                                         BOrd ord = BOrd.make(SlotPath.unescape(relPath));

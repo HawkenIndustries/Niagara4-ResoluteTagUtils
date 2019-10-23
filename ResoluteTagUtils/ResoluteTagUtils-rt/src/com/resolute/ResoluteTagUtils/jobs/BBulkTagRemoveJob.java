@@ -10,8 +10,9 @@ import javax.baja.naming.BOrd;
 import javax.baja.naming.SlotPath;
 import javax.baja.nre.annotations.NiagaraType;
 import javax.baja.sys.*;
+import javax.baja.tag.TagDictionary;
+import javax.baja.tag.TagDictionaryService;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Logger;
 
 @NiagaraType
@@ -46,54 +47,35 @@ public class BBulkTagRemoveJob extends BSimpleJob {
         ArrayList<BComponent> points = resolve (
                 BString.make(
                         SlotPath.unescape("slot:|bql: select * from control:ControlPoint")));
+        TagDictionaryService tagDictionaryService = Sys.getStation().getTagDictionaryService();
+        Collection<TagDictionary> tagDictionaries = tagDictionaryService.getTagDictionaries();
 
         BTagImporter tagImporter =
                 ((BResoluteTagUtils)Sys.getService(BResoluteTagUtils.TYPE)).getTagImporter();
 
-        multvsearch remover = (String filter[], BComponent point) -> {
-            log().message("Begin Bulk tag remove operation...");
-            if(filter[0].equals("*")){
-                point.tags().forEach( tag -> {
-                    boolean removed = point.tags().remove(tag);
-                    String msg = "Removed ".concat(tag.getId().getQName()) +
-                            " - ".concat(String.valueOf(removed));
-                    log().message(msg);
-                    logger.fine(msg);
-                });
-            }else{
-                for(String f : filter){
-                    AtomicBoolean removed = new AtomicBoolean(false);
-                    point.tags()
-                            .filter(tag -> tag.getId().getName().equals(f))
-                            .forEach(t -> {
-                                removed.set(point.tags().remove(t));
-                                String msg = "removed tag ".concat(t.getId().getQName()) +
-                                        "\n\t\tfrom ".concat(point.getName() +
-                                                        "\n\t\tfiltered by ".concat(f) +
-                                                        "\n\t\t".concat(String.valueOf(removed)));
-                                logger.fine(msg);
-                                log().message(msg);
-                            });
-                    String msg = "Removed tag? ".concat(String.valueOf(removed));
-                    logger.fine(msg);
-                    log().message(msg);
+        tagImporter.setIsJobRunning(true);
 
-                }
-            }
-        };
-
-        if(tagImporter.getTagFilter().isEmpty()){
+        if(tagImporter.getDeleteFilter().isEmpty()){
             logger.severe("[Bulk Tag Remove Async Job ERROR] - tagFilter field is empty; canceling job...!");
             this.cancel();
         }else{
+            String[] filters = tagImporter.getDeleteFilter().split(",");
             points.forEach( point -> {
-                String[] filter = tagImporter.getTagFilter().split(",");
-                String msg = point.getName() + tagImporter.getTagFilter();
-                remover.remove(filter, point);
-                logger.fine(msg);
-                log().message(msg);
+                if(filters[0].equals("*")){
+                    point.tags().forEach( tag -> {
+                        boolean removed = point.tags().remove(tag);
+                        String msg = "Removed ".concat(tag.getId().getQName()) +
+                                " - ".concat(String.valueOf(removed));
+                        log().message(msg);
+                        logger.info(msg);
+                    });
+                }else{
+                    filterDictionaries(filters, tagDictionaries, point);
+                    filterTags(filters, point);
+                }
             });
         }
+        tagImporter.setIsJobRunning(false);
     }
 
     @SuppressWarnings("unchecked")
@@ -112,7 +94,47 @@ public class BBulkTagRemoveJob extends BSimpleJob {
         return objRefs;
     }
 
-    @FunctionalInterface()
-    interface multvsearch { void remove(String[] filter, BComponent point); }
+    private void filterTags(String[]filter, BComponent point) {
+        for(String f : filter){
+            point.tags().forEach( tag -> {
+                logger.info("tag: ".concat(tag.getId().getName()) +
+                        "\t-\tfilter: ".concat(f));
+                if(tag.getId().getName().equals(f)){
+                    boolean removed = point.tags().remove(tag);
+                    String msg = "Removed ".concat(tag.getId().getQName()) +
+                            " - ".concat(String.valueOf(removed));
+                    log().message(msg);
+                    logger.info(msg);
+                }
+            });
+        }
+    }
 
+    private void filterDictionaries(String[] filter,
+                                   Collection<TagDictionary> tagDictionaries,
+                                   BComponent point) {
+        for(String f : filter){
+            tagDictionaries.forEach( tagDictionary -> {
+                if(tagDictionary.getDisplayName(null).equals(f)){
+                    logger.info("Dictionary: ".concat(tagDictionary.getDisplayName(null)) +
+                                "\t-\tfilter:  ".concat(f));
+                    point.tags().forEach( tag -> {
+                        logger.info("Tag's dictionary ".concat(tag.getId().getDictionary()));
+
+                        if(tag.getId().getDictionary()
+                                .equals(tagDictionary.getNamespace())){
+                            boolean removed = point.tags().remove(tag);
+
+                            logger.info("Id: ".concat(tag.getId().toString()) +
+                                    "\nNamespace: ".concat(tagDictionary.getNamespace()) +
+                                    "\nRemoved "+removed);
+                            log().message("Id: ".concat(tag.getId().toString()) +
+                                    "\nNamespace: ".concat(tagDictionary.getNamespace()) +
+                                    "\nRemoved "+removed);
+                        }
+                    });
+                }
+            });
+        }
+    }
 }

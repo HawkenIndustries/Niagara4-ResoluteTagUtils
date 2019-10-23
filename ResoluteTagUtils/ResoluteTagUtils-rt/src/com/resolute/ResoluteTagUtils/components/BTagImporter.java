@@ -19,19 +19,10 @@ import javax.baja.nre.annotations.NiagaraType;
 import javax.baja.sys.*;
 
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Logger;
 
 @NiagaraType
-
-@NiagaraProperty(
-        name = "importFile",
-        type = "baja:Ord",
-        defaultValue = "BOrd.make(\"file:^ResoluteImports/rbiTagImport.json\")",
-        facets = {
-                @Facet(name = "BFacets.TARGET_TYPE", value = "\"baja:IFile\"")
-        },
-        flags = Flags.HIDDEN
-)
 
 @NiagaraProperty(
         name = "tags",
@@ -47,17 +38,27 @@ import java.util.logging.Logger;
 )
 
 @NiagaraProperty(
-        name = "tagFilter",
-        type = "baja:String",
-        defaultValue = "BString.make(\"\")",
-        flags = Flags.HIDDEN | Flags.OPERATOR
+        name = "importFile",
+        type = "baja:Ord",
+        defaultValue = "BOrd.make(\"file:^ResoluteImports/rbiTagImport.json\")",
+        facets = {
+                @Facet(name = "BFacets.TARGET_TYPE", value = "\"baja:IFile\"")
+        },
+        flags = Flags.SUMMARY
 )
 
 @NiagaraProperty(
-        name = "dictionaryFilter",
+        name = "deleteFilter",
         type = "baja:String",
         defaultValue = "BString.make(\"\")",
-        flags = Flags.HIDDEN | Flags.OPERATOR
+        flags = Flags.SUMMARY
+)
+
+@NiagaraProperty(
+        name = "taggingFilter",
+        type = "baja:String",
+        defaultValue = "BString.make(\"\")",
+        flags = Flags.SUMMARY
 )
 
 @NiagaraAction(
@@ -81,31 +82,8 @@ import java.util.logging.Logger;
 
 public class BTagImporter extends BComponent {
 /*+ ------------ BEGIN BAJA AUTO GENERATED CODE ------------ +*/
-/*@ $com.resolute.ResoluteTagUtils.components.BTagImporter(1133203628)1.0$ @*/
-/* Generated Mon Oct 21 16:55:53 EDT 2019 by Slot-o-Matic (c) Tridium, Inc. 2012 */
-
-////////////////////////////////////////////////////////////////
-// Property "importFile"
-////////////////////////////////////////////////////////////////
-  
-  /**
-   * Slot for the {@code importFile} property.
-   * @see #getImportFile
-   * @see #setImportFile
-   */
-  public static final Property importFile = newProperty(Flags.HIDDEN, BOrd.make("file:^ResoluteImports/rbiTagImport.json"), BFacets.make(BFacets.TARGET_TYPE, "baja:IFile"));
-  
-  /**
-   * Get the {@code importFile} property.
-   * @see #importFile
-   */
-  public BOrd getImportFile() { return (BOrd)get(importFile); }
-  
-  /**
-   * Set the {@code importFile} property.
-   * @see #importFile
-   */
-  public void setImportFile(BOrd v) { set(importFile, v, null); }
+/*@ $com.resolute.ResoluteTagUtils.components.BTagImporter(1394370263)1.0$ @*/
+/* Generated Tue Oct 22 15:08:39 EDT 2019 by Slot-o-Matic (c) Tridium, Inc. 2012 */
 
 ////////////////////////////////////////////////////////////////
 // Property "tags"
@@ -154,50 +132,73 @@ public class BTagImporter extends BComponent {
   public void setJsonVersion(double v) { setDouble(jsonVersion, v, null); }
 
 ////////////////////////////////////////////////////////////////
-// Property "tagFilter"
+// Property "importFile"
 ////////////////////////////////////////////////////////////////
   
   /**
-   * Slot for the {@code tagFilter} property.
-   * @see #getTagFilter
-   * @see #setTagFilter
+   * Slot for the {@code importFile} property.
+   * @see #getImportFile
+   * @see #setImportFile
    */
-  public static final Property tagFilter = newProperty(Flags.HIDDEN | Flags.OPERATOR, BString.make(""), null);
+  public static final Property importFile = newProperty(Flags.SUMMARY, BOrd.make("file:^ResoluteImports/rbiTagImport.json"), BFacets.make(BFacets.TARGET_TYPE, "baja:IFile"));
   
   /**
-   * Get the {@code tagFilter} property.
-   * @see #tagFilter
+   * Get the {@code importFile} property.
+   * @see #importFile
    */
-  public String getTagFilter() { return getString(tagFilter); }
+  public BOrd getImportFile() { return (BOrd)get(importFile); }
   
   /**
-   * Set the {@code tagFilter} property.
-   * @see #tagFilter
+   * Set the {@code importFile} property.
+   * @see #importFile
    */
-  public void setTagFilter(String v) { setString(tagFilter, v, null); }
+  public void setImportFile(BOrd v) { set(importFile, v, null); }
 
 ////////////////////////////////////////////////////////////////
-// Property "dictionaryFilter"
+// Property "deleteFilter"
 ////////////////////////////////////////////////////////////////
   
   /**
-   * Slot for the {@code dictionaryFilter} property.
-   * @see #getDictionaryFilter
-   * @see #setDictionaryFilter
+   * Slot for the {@code deleteFilter} property.
+   * @see #getDeleteFilter
+   * @see #setDeleteFilter
    */
-  public static final Property dictionaryFilter = newProperty(Flags.HIDDEN | Flags.OPERATOR, BString.make(""), null);
+  public static final Property deleteFilter = newProperty(Flags.SUMMARY, BString.make(""), null);
   
   /**
-   * Get the {@code dictionaryFilter} property.
-   * @see #dictionaryFilter
+   * Get the {@code deleteFilter} property.
+   * @see #deleteFilter
    */
-  public String getDictionaryFilter() { return getString(dictionaryFilter); }
+  public String getDeleteFilter() { return getString(deleteFilter); }
   
   /**
-   * Set the {@code dictionaryFilter} property.
-   * @see #dictionaryFilter
+   * Set the {@code deleteFilter} property.
+   * @see #deleteFilter
    */
-  public void setDictionaryFilter(String v) { setString(dictionaryFilter, v, null); }
+  public void setDeleteFilter(String v) { setString(deleteFilter, v, null); }
+
+////////////////////////////////////////////////////////////////
+// Property "taggingFilter"
+////////////////////////////////////////////////////////////////
+  
+  /**
+   * Slot for the {@code taggingFilter} property.
+   * @see #getTaggingFilter
+   * @see #setTaggingFilter
+   */
+  public static final Property taggingFilter = newProperty(Flags.SUMMARY, BString.make(""), null);
+  
+  /**
+   * Get the {@code taggingFilter} property.
+   * @see #taggingFilter
+   */
+  public String getTaggingFilter() { return getString(taggingFilter); }
+  
+  /**
+   * Set the {@code taggingFilter} property.
+   * @see #taggingFilter
+   */
+  public void setTaggingFilter(String v) { setString(taggingFilter, v, null); }
 
 ////////////////////////////////////////////////////////////////
 // Action "tagIt"
@@ -310,16 +311,67 @@ public class BTagImporter extends BComponent {
    ***/
 
   private static Logger logger = Logger.getLogger("Resolute Tag Utils");
-
+  private AtomicReference<Boolean> isJobRunning = new AtomicReference<>(false);
   private BPointTable pointTable;
+
   public BPointTable getPointTable(){ return pointTable; }
   public void setPointTable(BPointTable pointTable){
     this.pointTable = pointTable;
   }
 
+  public boolean getIsJobRunning(){
+    return isJobRunning.get();
+  }
+  public void setIsJobRunning(boolean jobStatus){
+    isJobRunning.set(jobStatus);
+  }
+
   @Override
   public void started(){
       logger.fine("TagImporter...started");
+    setImportFile(BOrd.make("file:^ResoluteImports/rbiTagImport.json"));
+    try{
+      BIFile file = (BIFile)getImportFile().get(Sys.getStation());
+      logger.info(file.getFilePath().toString().concat(" folder already present in the station..."));
+
+      String ord = getImportFile().encodeToString();
+      BOrd resDir = BOrd.make((ord.split("/"))[0]);
+      OrdQuery[] fileQueries = getImportFile().parse();
+      FilePath fp = (FilePath)fileQueries[fileQueries.length-1];
+      BIDirectory resoluteDir = (BIDirectory)resDir.get(Sys.getStation());
+      try{
+        logger.info("Checking for old tag import files in the Resolute folder...");
+        for(BIFile f: resoluteDir.listFiles()){
+          if(f.getFileName().equals(file.getFileName())){
+            logger.warning("Found old copies of the tag import file in the Resolute folder...\nDeleting...");
+            logger.info(file.getFileName());
+            BFileSystem.INSTANCE.delete(fp, null);
+          }
+        }
+
+      }catch(IOException ioe){
+        logger.severe(ioe.getMessage());
+        ioe.printStackTrace();
+      }
+
+    }catch(UnresolvedException ue){
+
+      logger.warning(ue.getMessage());
+      logger.warning("Resolute folder not found...\nCreating...");
+
+      String ord = getImportFile().encodeToString();
+      BOrd resDir = BOrd.make((ord.split("/"))[0]);
+      OrdQuery[] dirQueries = resDir.parse();
+      FilePath dp = (FilePath)dirQueries[dirQueries.length-1];
+
+      try{
+        BIDirectory resoluteDir = BFileSystem.INSTANCE.makeDir(dp,null);
+        logger.info(resoluteDir.getNavName().concat(" created..."));
+      }catch(IOException ioe){
+        logger.severe(ioe.getMessage());
+        ioe.printStackTrace();
+      }
+    }
   }
 
   @Override
@@ -372,42 +424,60 @@ public class BTagImporter extends BComponent {
   }
 
   public void doTagIt(BString filter, Context cx){
-    if(!filter.getString().isEmpty()){
-      try{
-        setDictionaryFilter(filter.encodeToString());
-        BJobService.getService().submit(new BTaggingJob(), cx);
-      }catch(IOException ioe){
-        logger.severe(ioe.getMessage());
-        ioe.printStackTrace();
+//    if(getIsJobRunning()){
+      if(!filter.getString().isEmpty()){
+        try{
+          setTaggingFilter(filter.encodeToString());
+          BJobService.getService().submit(new BTaggingJob(), cx);
+        }catch(IOException ioe){
+          logger.severe(ioe.getMessage());
+          ioe.printStackTrace();
+          setIsJobRunning(false);
+        }
+      }else{
+        NullPointerException npe = new NullPointerException();
+        logger.severe("[Bulk Tag Remove Op Error] - Tag filter field can't be empty...! "
+                + npe.getMessage());
+        setIsJobRunning(false);
+        throw npe;
       }
-    }else{
-      NullPointerException npe = new NullPointerException();
-      logger.severe("[Bulk Tag Remove Op Error] - Tag filter field can't be empty...! "
-              + npe.getMessage());
-      throw npe;
-    }
+//    }else{
+//      logger.warning("Another Operation is already running, and must end before you can execute a new one...!");
+//    }
+
+
   }
 
   public void doRemoveIt(BString filter, Context cx){
-    if(!filter.getString().isEmpty()){
-      try{
-        setTagFilter(filter.encodeToString());
-        BJobService.getService().submit(new BBulkTagRemoveJob(), cx);
-      }catch(IOException ioe){
-        logger.severe(ioe.getMessage());
-        ioe.printStackTrace();
-      }
+//    if(getIsJobRunning()){
+      if(!filter.getString().isEmpty()){
+        try{
+          setDeleteFilter(filter.encodeToString());
+          BJobService.getService().submit(new BBulkTagRemoveJob(), cx);
+        }catch(IOException ioe){
+          logger.severe(ioe.getMessage());
+          ioe.printStackTrace();
+          setIsJobRunning(false);
+        }
 
-    }else{
-      NullPointerException npe = new NullPointerException();
-      logger.severe("[Bulk Tag Remove Op Error] - Tag filter field can't be empty...! "
-              + npe.getMessage());
-      throw npe;
-    }
+      }else{
+        NullPointerException npe = new NullPointerException();
+        logger.severe("[Bulk Tag Remove Op Error] - Tag filter field can't be empty...! "
+                + npe.getMessage());
+        setIsJobRunning(false);
+        throw npe;
+      }
+//    }else{
+//      logger.warning("Another Operation is already running, and must end before you can execute a new one...!");
+//    }
   }
 
   public void doFetchIt(Context cx){
-    BJobService.getService().submit(new BFetchJob(), cx);
+//    if(getIsJobRunning()){
+      BJobService.getService().submit(new BFetchJob(), cx);
+//    }else{
+//      logger.warning("Another Operation is already running, and must end before you can execute a new one...!");
+//    }
   }
 
   public static BTagImporter make(){

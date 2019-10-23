@@ -39,9 +39,11 @@ public class BFetchJob extends BSimpleJob {
     @Override
     public void run(Context cx) throws  Exception {
 
-        Reader streamReader = null;
+        progress(0);
         BTagImporter tagImporter =
                 ((BResoluteTagUtils)Sys.getService(BResoluteTagUtils.TYPE)).getTagImporter();
+
+        tagImporter.setIsJobRunning(true);
 
         URL url = new URL("http://localhost:1880/ResoluteTagImport");
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
@@ -56,12 +58,17 @@ public class BFetchJob extends BSimpleJob {
 
         logger.fine("HTTP Response Status: "+con.getResponseMessage());
         if(status == 200){
+            int p = 25;
+            progress(p);
+            log().message("Connection found with HTTP Status ".concat(String.valueOf(status)));
             BufferedReader in = new BufferedReader(
                     new InputStreamReader(con.getInputStream()));
             String inputLine;
             StringBuffer content = new StringBuffer();
+//            double addConstant = 50.0 / (double)in.lines().count();
             while ((inputLine = in.readLine()) != null) {
                 content.append(inputLine);
+//                progress(p+=(int) addConstant);
             }
             in.close();
             logger.fine(content.toString());
@@ -70,11 +77,14 @@ public class BFetchJob extends BSimpleJob {
                 boolean importFileExists = false;
                 BDirectory resoluteDir =
                         (BDirectory) BOrd.make("file:^ResoluteImports").get(Sys.getStation());
+                double addK = 75 / (double)resoluteDir.listFiles().length;
                 for(BIFile f : resoluteDir.listFiles()){
+                    progress(p+=addK);
                     if(f.getFileName().equals("rbiTagImport.json")){
                         f.write("".getBytes());
                         f.write(content.toString().getBytes());
                         importFileExists = true;
+                        progress(100);
                         break;
                     }
                 }
@@ -83,15 +93,13 @@ public class BFetchJob extends BSimpleJob {
                     FilePath fp = (FilePath)queries[queries.length-1];
                     BIFile file = BFileSystem.INSTANCE.makeFile(fp, null);
                     file.write(content.toString().getBytes());
+                    progress(100);
                 }
-            }catch(UnresolvedException ue){
+            }catch(UnresolvedException | IOException ue){
                 log().message(ue.getMessage());
                 ue.printStackTrace();
-            }catch(IOException ioe){
-                log().message(ioe.getMessage());
-                ioe.printStackTrace();
+                tagImporter.setIsJobRunning(false);
             }
-
         }else{
             BufferedReader err = new BufferedReader(
                     new InputStreamReader(con.getErrorStream()));
@@ -100,10 +108,11 @@ public class BFetchJob extends BSimpleJob {
             while((inputLine = err.readLine()) != null){
                 content.append(inputLine);
             }
-            logger.severe("http request failed with: "+String.valueOf(status));
+            logger.severe("http request failed with: ".concat(String.valueOf(status)));
             logger.severe(content.toString());
         }
         con.disconnect();
+        tagImporter.setIsJobRunning(false);
     }
 
 
