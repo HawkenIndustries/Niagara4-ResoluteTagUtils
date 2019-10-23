@@ -424,7 +424,7 @@ public class BTagImporter extends BComponent {
   }
 
   public void doTagIt(BString filter, Context cx){
-//    if(getIsJobRunning()){
+
       if(!filter.getString().isEmpty()){
         try{
           setTaggingFilter(filter.encodeToString());
@@ -441,15 +441,10 @@ public class BTagImporter extends BComponent {
         setIsJobRunning(false);
         throw npe;
       }
-//    }else{
-//      logger.warning("Another Operation is already running, and must end before you can execute a new one...!");
-//    }
-
-
   }
 
   public void doRemoveIt(BString filter, Context cx){
-//    if(getIsJobRunning()){
+
       if(!filter.getString().isEmpty()){
         try{
           setDeleteFilter(filter.encodeToString());
@@ -467,17 +462,11 @@ public class BTagImporter extends BComponent {
         setIsJobRunning(false);
         throw npe;
       }
-//    }else{
-//      logger.warning("Another Operation is already running, and must end before you can execute a new one...!");
-//    }
   }
 
   public void doFetchIt(Context cx){
-//    if(getIsJobRunning()){
+
       BJobService.getService().submit(new BFetchJob(), cx);
-//    }else{
-//      logger.warning("Another Operation is already running, and must end before you can execute a new one...!");
-//    }
   }
 
   public static BTagImporter make(){

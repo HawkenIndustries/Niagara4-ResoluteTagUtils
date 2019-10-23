@@ -45,8 +45,17 @@ public class BFetchJob extends BSimpleJob {
 
         tagImporter.setIsJobRunning(true);
 
-        URL url = new URL("http://localhost:1880/ResoluteTagImport");
-        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+        URL extUrl = new URL("http://localhost:1880/ResoluteTagImport");
+        URL sharedUrl = new URL("file:///C:/Users/Victor%20Smolinski/Niagara4.6/tridium/rbiTagImport.json");
+        HttpURLConnection con;
+        try{
+            con = (HttpURLConnection) extUrl.openConnection();
+        }catch(Exception e){
+            logger.warning(e.getMessage());
+            e.printStackTrace();
+            con = (HttpURLConnection) sharedUrl.openConnection();
+        }
+
         con.setRequestMethod("GET");
         con.setDoOutput(true);
         con.setRequestProperty("Content-Type", "application/json");

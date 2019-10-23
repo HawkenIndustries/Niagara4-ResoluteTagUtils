@@ -13,6 +13,7 @@ import javax.baja.sys.*;
 import javax.baja.tag.TagDictionary;
 import javax.baja.tag.TagDictionaryService;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Logger;
 
 @NiagaraType
@@ -44,38 +45,69 @@ public class BBulkTagRemoveJob extends BSimpleJob {
 
     @Override
     public void run(Context context) throws Exception {
+
+        BTagImporter tagImporter =
+                ((BResoluteTagUtils)Sys.getService(BResoluteTagUtils.TYPE)).getTagImporter();
+
+        progress(0);
+        logger.info("Bulk-Tag-Remove-Job Progress...".concat(String.valueOf(getProgress())));
+
         ArrayList<BComponent> points = resolve (
                 BString.make(
                         SlotPath.unescape("slot:|bql: select * from control:ControlPoint")));
         TagDictionaryService tagDictionaryService = Sys.getStation().getTagDictionaryService();
         Collection<TagDictionary> tagDictionaries = tagDictionaryService.getTagDictionaries();
 
-        BTagImporter tagImporter =
-                ((BResoluteTagUtils)Sys.getService(BResoluteTagUtils.TYPE)).getTagImporter();
-
-        tagImporter.setIsJobRunning(true);
-
         if(tagImporter.getDeleteFilter().isEmpty()){
             logger.severe("[Bulk Tag Remove Async Job ERROR] - tagFilter field is empty; canceling job...!");
             this.cancel();
         }else{
             String[] filters = tagImporter.getDeleteFilter().split(",");
+            progress(1);
+            logger.info("Bulk-Tag-Remove-Job Progress...".concat(String.valueOf(getProgress())));
             points.forEach( point -> {
                 if(filters[0].equals("*")){
+
+                    final long before, after, elapsed;
+                    AtomicReference<Integer> totalOps = new AtomicReference<>(0);
+                    long progressUnitPerPoint = 100 / points.size();
+                    before = System.currentTimeMillis();
+
                     point.tags().forEach( tag -> {
+
+                        ///////////BENCHMARK////////////////////////////////////////////////////////////
+                        totalOps.set(totalOps.get() + point.tags().getAll().size());
+                        long progressUnit = progressUnitPerPoint / point.tags().getAll().size();
+                        if(getProgress() < 100){
+                            int progress = 0;
+                            progress(progress+=progressUnit);
+                        }
+                        ///////////BENCHMARK////////////////////////////////////////////////////////////
                         boolean removed = point.tags().remove(tag);
                         String msg = "Removed ".concat(tag.getId().getQName()) +
-                                " - ".concat(String.valueOf(removed));
+                                " - ".concat(String.valueOf(removed)) +
+                                " - Progress...".concat(String.valueOf(getProgress()));
                         log().message(msg);
                         logger.info(msg);
                     });
+
+                    ///////////BENCHMARK////////////////////////////////////////////////////////////
+                    after = System.currentTimeMillis();
+                    elapsed = after - before;
+                    logger.info("N of Points: ".concat(String.valueOf(points.size())));
+                    logger.info("Start Time: ".concat(String.valueOf(before)));
+                    logger.info("End Time: ".concat(String.valueOf(after)));
+                    logger.info("------------");
+                    logger.info("Elapsed Time: ".concat(String.valueOf(elapsed)));
+                    logger.info("Total Ops: ".concat(String.valueOf(totalOps.get())));
+                    logger.info("Time elapsed Per Operation: "
+                            .concat(String.valueOf((double) elapsed / (double)totalOps.get())) + " millis");
                 }else{
                     filterDictionaries(filters, tagDictionaries, point);
                     filterTags(filters, point);
                 }
             });
         }
-        tagImporter.setIsJobRunning(false);
     }
 
     @SuppressWarnings("unchecked")
