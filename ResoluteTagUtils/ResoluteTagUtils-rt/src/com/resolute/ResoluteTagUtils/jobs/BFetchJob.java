@@ -1,7 +1,12 @@
 package com.resolute.ResoluteTagUtils.jobs;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
 import com.resolute.ResoluteTagUtils.components.BTagImporter;
 import com.resolute.ResoluteTagUtils.services.BResoluteTagUtils;
+import com.resolute.ResoluteTagUtils.utils.HttpClientConnection;
+import com.resolute.ResoluteTagUtils.utils.HttpResponse;
 
 import javax.baja.file.*;
 import javax.baja.job.BSimpleJob;
@@ -15,6 +20,10 @@ import javax.baja.sys.Type;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.file.Paths;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+import java.util.HashMap;
 import java.util.logging.Logger;
 
 @NiagaraType
@@ -39,90 +48,217 @@ public class BFetchJob extends BSimpleJob {
     @Override
     public void run(Context cx) throws  Exception {
 
-        progress(0);
         BTagImporter tagImporter =
                 ((BResoluteTagUtils)Sys.getService(BResoluteTagUtils.TYPE)).getTagImporter();
 
-        tagImporter.setIsJobRunning(true);
+        URL updateUrl = new URL("http://localhost:1880/Resolute/tagImport/fetch");
+        URL versionUrl = new URL("http://localhost:1880/Resolute/tagImport/version");
 
-        URL extUrl = new URL("http://localhost:1880/ResoluteTagImport");
-        URL sharedUrl = new URL("file:///C:/Users/Victor%20Smolinski/Niagara4.6/tridium/rbiTagImport.json");
+        HashMap<String, String> headers = new HashMap<>();
+        headers.put("Content-Type", "application/json");
+        headers.put("Accept", "application/json");
+
+        try{
+            HttpClientConnection versionConn = HttpClientConnection.builder()
+                    .withHttpMethod("GET")
+                    .withHeaders(headers)
+                    .withUrlTarget(versionUrl)
+                    .build();
+            HttpResponse response = versionConn.doGet();
+
+            logger.info("Version HTTP call:");
+            logger.info("HTTP Status: ".concat(String.valueOf(
+                    response.getStatus())));
+            logger.info("HTTP Msg: ".concat(String.valueOf(response.getMsg())));
+
+            checkCachedVersion(response.getMsg(), tagImporter, updateUrl);
+
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+
+
+
+    }
+
+    public void fetchFromServer(BTagImporter tagImporter, URL serverUrl){
         HttpURLConnection con;
         try{
-            con = (HttpURLConnection) extUrl.openConnection();
+            con = (HttpURLConnection) serverUrl.openConnection();
+            con.setRequestMethod("GET");
+            con.setDoOutput(true);
+            con.setRequestProperty("Content-Type", "application/json");
+            con.setRequestProperty("Accept", "application/json");
+            con.setConnectTimeout(5000);
+            con.setReadTimeout(5000);
+
+            int status = con.getResponseCode();
+            logger.fine("HTTP Response Status: "+con.getResponseMessage());
+
+            if(status == 200){
+                log().message("Connection found with HTTP Status ".concat(String.valueOf(status)));
+                BufferedReader in = new BufferedReader(
+                        new InputStreamReader(con.getInputStream()));
+                String inputLine;
+                StringBuilder content = new StringBuilder();
+                while ((inputLine = in.readLine()) != null) {
+                    content.append(inputLine);
+                }
+                in.close();
+                String c = content.toString();
+                writeToSharedFile(c);
+                writeToStationFile(c, tagImporter);
+                logger.fine(content.toString());
+
+            }else{
+                BufferedReader err = new BufferedReader(
+                        new InputStreamReader(con.getErrorStream()));
+                String inputLine;
+                StringBuilder content = new StringBuilder();
+                while((inputLine = err.readLine()) != null){
+                    content.append(inputLine);
+                }
+                err.close();
+                logger.severe("http request failed with: ".concat(String.valueOf(status)));
+                logger.severe(content.toString());
+            }
+            con.disconnect();
         }catch(Exception e){
             logger.warning(e.getMessage());
             e.printStackTrace();
-            con = (HttpURLConnection) sharedUrl.openConnection();
-        }
-
-        con.setRequestMethod("GET");
-        con.setDoOutput(true);
-        con.setRequestProperty("Content-Type", "application/json");
-        con.setRequestProperty("Accept", "application/json");
-        con.setConnectTimeout(5000);
-        con.setReadTimeout(5000);
-
-        int status = con.getResponseCode();
-
-        logger.fine("HTTP Response Status: "+con.getResponseMessage());
-        if(status == 200){
-            int p = 25;
-            progress(p);
-            log().message("Connection found with HTTP Status ".concat(String.valueOf(status)));
-            BufferedReader in = new BufferedReader(
-                    new InputStreamReader(con.getInputStream()));
-            String inputLine;
-            StringBuffer content = new StringBuffer();
-//            double addConstant = 50.0 / (double)in.lines().count();
-            while ((inputLine = in.readLine()) != null) {
-                content.append(inputLine);
-//                progress(p+=(int) addConstant);
-            }
-            in.close();
-            logger.fine(content.toString());
-
             try{
-                boolean importFileExists = false;
-                BDirectory resoluteDir =
-                        (BDirectory) BOrd.make("file:^ResoluteImports").get(Sys.getStation());
-                double addK = 75 / (double)resoluteDir.listFiles().length;
-                for(BIFile f : resoluteDir.listFiles()){
-                    progress(p+=addK);
-                    if(f.getFileName().equals("rbiTagImport.json")){
-                        f.write("".getBytes());
-                        f.write(content.toString().getBytes());
-                        importFileExists = true;
-                        progress(100);
-                        break;
+                File f = new File(Sys.getNiagaraSharedUserHome(), "rbiTagImport.json");
+
+                StringBuilder content;
+                try (BufferedReader in = new BufferedReader(new FileReader(f))) {
+                    content = new StringBuilder();
+                    String inputLine;
+                    while ((inputLine = in.readLine()) != null) {
+                        content.append(inputLine);
                     }
                 }
-                if(!importFileExists){
-                    OrdQuery[] queries = tagImporter.getImportFile().parse();
-                    FilePath fp = (FilePath)queries[queries.length-1];
-                    BIFile file = BFileSystem.INSTANCE.makeFile(fp, null);
-                    file.write(content.toString().getBytes());
-                    progress(100);
-                }
-            }catch(UnresolvedException | IOException ue){
-                log().message(ue.getMessage());
-                ue.printStackTrace();
-                tagImporter.setIsJobRunning(false);
+                writeToStationFile(content.toString(), tagImporter);
+            }catch(FileNotFoundException fnfe){
+                logger.severe("File not found in ".concat(Sys.getNiagaraSharedUserHome().getAbsolutePath()));
+                logger.severe(fnfe.getMessage());
+                fnfe.printStackTrace();
+            }catch(Exception e1){
+                logger.severe(e1.getMessage());
+                e1.printStackTrace();
             }
-        }else{
-            BufferedReader err = new BufferedReader(
-                    new InputStreamReader(con.getErrorStream()));
-            String inputLine;
-            StringBuffer content = new StringBuffer();
-            while((inputLine = err.readLine()) != null){
-                content.append(inputLine);
-            }
-            logger.severe("http request failed with: ".concat(String.valueOf(status)));
-            logger.severe(content.toString());
         }
-        con.disconnect();
-        tagImporter.setIsJobRunning(false);
     }
 
+    private void fetchFromCache(BTagImporter tagImporter){
+        try{
+            File f = new File(Sys.getNiagaraSharedUserHome(), "rbiTagImport.json");
 
+            StringBuilder content;
+            try (BufferedReader in = new BufferedReader(new FileReader(f))) {
+                content = new StringBuilder();
+                String inputLine;
+                while ((inputLine = in.readLine()) != null) {
+                    content.append(inputLine);
+                }
+            }
+            writeToStationFile(content.toString(), tagImporter);
+        }catch(FileNotFoundException fnfe){
+            logger.severe("File not found in ".concat(Sys.getNiagaraSharedUserHome().getAbsolutePath()));
+            logger.severe(fnfe.getMessage());
+            fnfe.printStackTrace();
+        }catch(Exception e1){
+            logger.severe(e1.getMessage());
+            e1.printStackTrace();
+        }
+    }
+
+    private void checkCachedVersion(String jsonVersion, BTagImporter tagImporter, URL serverUrl){
+        AccessController.doPrivileged((PrivilegedAction <Void>)() -> {
+            try{
+                Gson gson = new GsonBuilder().setPrettyPrinting().serializeNulls().create();
+                JsonObject fileContent = gson.fromJson(
+                        new FileReader(
+                                Paths.get(Sys.getNiagaraSharedUserHome().getAbsolutePath(),
+                                        "rbiTagImport.json").toString()),
+                        JsonObject.class);
+                JsonObject version = gson.fromJson(jsonVersion, JsonObject.class);
+                double latestVersion = Double.parseDouble(version.get("version").getAsString());
+                double cacheVersion = Double.parseDouble(fileContent.get("version").getAsString());
+                final String msg = "Cached Version: ".concat(String.valueOf(cacheVersion)) +
+                                   "\nLatest Version: ".concat(String.valueOf(latestVersion));
+                if(latestVersion == cacheVersion){
+                    logger.info("EQUAL VERSIONS...");
+                    logger.info(msg);
+                    fetchFromCache(tagImporter);
+
+                }else if(latestVersion > cacheVersion){
+                    logger.info("CACHE NEEDS UPDATE...");
+                    logger.info(msg);
+                    fetchFromServer(tagImporter, serverUrl);
+
+                }else{
+                    logger.info("ERROR - CACHE VERSION HIGHER THAN SERVER...");
+                    logger.info(msg);
+                    fetchFromServer(tagImporter, serverUrl);
+                }
+            }catch(Exception e){
+                logger.severe(e.getMessage());
+                e.printStackTrace();
+                fetchFromServer(tagImporter, serverUrl);
+            }
+            return null;
+        });
+    }
+
+    private void writeToSharedFile(String content){
+        try{
+            if(!content.isEmpty()){
+                File f = new File(Sys.getNiagaraSharedUserHome(), "rbiTagImport.json");
+                FileWriter fw = new FileWriter(f);
+                fw.write(content);
+                logger.info("writing to cache...");
+                fw.close();
+            }else{
+                logger.warning(
+                        "fetchJob.writeToSharedFile() just tried to write empty to the cache file...!!!");
+            }
+        }catch(FileNotFoundException fnfe){
+            logger.severe("File not found in "
+                    .concat(Paths
+                            .get(Sys.getNiagaraSharedUserHome()
+                                    .getAbsolutePath(), "rbiTagImport.json").toString()));
+            logger.severe(fnfe.getMessage());
+            fnfe.printStackTrace();
+        }catch(Exception e1){
+            logger.severe(e1.getMessage());
+            e1.printStackTrace();
+        }
+    }
+
+    private void writeToStationFile(String content, BTagImporter tagImporter){
+        try{
+            boolean importFileExists = false;
+            BDirectory resoluteDir =
+                    (BDirectory) BOrd.make("file:^ResoluteImports").get(Sys.getStation());
+            for(BIFile f : resoluteDir.listFiles()){
+                if(f.getFileName().equals("rbiTagImport.json")){
+                    f.write("".getBytes());
+                    f.write(content.getBytes());
+                    importFileExists = true;
+                    progress(100);
+                    break;
+                }
+            }
+            if(!importFileExists){
+                OrdQuery[] queries = tagImporter.getImportFile().parse();
+                FilePath fp = (FilePath)queries[queries.length-1];
+                BIFile file = BFileSystem.INSTANCE.makeFile(fp, null);
+                file.write(content.getBytes());
+                progress(100);
+            }
+        }catch(UnresolvedException | IOException ue){
+            log().message(ue.getMessage());
+            ue.printStackTrace();
+        }
+    }
 }

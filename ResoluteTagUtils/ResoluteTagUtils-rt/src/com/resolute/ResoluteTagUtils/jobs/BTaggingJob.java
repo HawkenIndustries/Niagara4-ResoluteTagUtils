@@ -64,9 +64,8 @@ public class BTaggingJob extends BSimpleJob {
         TagDictionaryService tagDictionaryService = Sys.getStation().getTagDictionaryService();
         Collection<TagDictionary> tagDictionaries = tagDictionaryService.getTagDictionaries();
         String rawFilter = tagImporter.getTaggingFilter();
-        HashSet<Point> points = getPoints(tagImporter);
 
-        tagImporter.setIsJobRunning(true);
+        HashSet<Point> points = getPoints(tagImporter);
 
         /***
          * Pass the hashset to a baja table for the ui to display values...
@@ -93,7 +92,6 @@ public class BTaggingJob extends BSimpleJob {
                 tagOp(points, filterDicionaries(filter, tagDictionaries));
             }
         }
-        tagImporter.setIsJobRunning(false);
     }
 
     /***
@@ -102,7 +100,8 @@ public class BTaggingJob extends BSimpleJob {
      * @param tagDictionaries
      * @return
      */
-    private Collection<TagDictionary> filterDicionaries(String[] filter, Collection<TagDictionary> tagDictionaries) {
+    private Collection<TagDictionary> filterDicionaries(String[] filter,
+                                                        Collection<TagDictionary> tagDictionaries) {
 
         Collection<TagDictionary> finalDictList = null;
         for(String f : filter){
