@@ -3,6 +3,7 @@ package com.resolute.ResoluteTagUtils.components;
 import com.resolute.ResoluteTagUtils.jobs.BBulkTagRemoveJob;
 import com.resolute.ResoluteTagUtils.jobs.BFetchJob;
 import com.resolute.ResoluteTagUtils.jobs.BTaggingJob;
+import com.resolute.ResoluteTagUtils.utils.BJobInterlockWorker;
 
 import javax.baja.file.BFileSystem;
 import javax.baja.file.BIDirectory;
@@ -18,6 +19,8 @@ import javax.baja.nre.annotations.NiagaraAction;
 import javax.baja.nre.annotations.NiagaraProperty;
 import javax.baja.nre.annotations.NiagaraType;
 import javax.baja.sys.*;
+import javax.baja.util.IFuture;
+import javax.baja.util.Invocation;
 
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicReference;
@@ -62,11 +65,17 @@ import java.util.logging.Logger;
         flags = Flags.SUMMARY
 )
 
+@NiagaraProperty(
+        name = "jobInterlockWorker",
+        type = "ResoluteTagUtils:JobInterlockWorker",
+        defaultValue = "BJobInterlockWorker.make()",
+        flags = Flags.SUMMARY
+)
+
 @NiagaraAction(
         name = "tagIt",
         parameterType = "baja:String",
         defaultValue = "BString.make(\"\")",
-        returnType = "baja:SimpleJob",
         flags = Flags.OPERATOR | Flags.SUMMARY
 )
 
@@ -74,20 +83,23 @@ import java.util.logging.Logger;
         name = "removeIt",
         parameterType = "baja:String",
         defaultValue = "BString.make(\"\")",
-        returnType = "baja:SimpleJob",
         flags = Flags.SUMMARY | Flags.OPERATOR
 )
 
 @NiagaraAction(
         name = "fetchIt",
-        returnType = "baja:SimpleJob",
         flags = Flags.OPERATOR | Flags.SUMMARY
 )
 
+//@NiagaraAction(
+//        name = "checkRunningJobs",
+//        flags = Flags.SUMMARY
+//)
+
 public class BTagImporter extends BComponent {
 /*+ ------------ BEGIN BAJA AUTO GENERATED CODE ------------ +*/
-/*@ $com.resolute.ResoluteTagUtils.components.BTagImporter(3234614544)1.0$ @*/
-/* Generated Fri Oct 25 09:19:58 EDT 2019 by Slot-o-Matic (c) Tridium, Inc. 2012 */
+/*@ $com.resolute.ResoluteTagUtils.components.BTagImporter(2730843638)1.0$ @*/
+/* Generated Fri Oct 25 15:59:00 EDT 2019 by Slot-o-Matic (c) Tridium, Inc. 2012 */
 
 ////////////////////////////////////////////////////////////////
 // Property "tags"
@@ -205,6 +217,29 @@ public class BTagImporter extends BComponent {
   public void setTaggingFilter(String v) { setString(taggingFilter, v, null); }
 
 ////////////////////////////////////////////////////////////////
+// Property "jobInterlockWorker"
+////////////////////////////////////////////////////////////////
+  
+  /**
+   * Slot for the {@code jobInterlockWorker} property.
+   * @see #getJobInterlockWorker
+   * @see #setJobInterlockWorker
+   */
+  public static final Property jobInterlockWorker = newProperty(Flags.SUMMARY, BJobInterlockWorker.make(), null);
+  
+  /**
+   * Get the {@code jobInterlockWorker} property.
+   * @see #jobInterlockWorker
+   */
+  public BJobInterlockWorker getJobInterlockWorker() { return (BJobInterlockWorker)get(jobInterlockWorker); }
+  
+  /**
+   * Set the {@code jobInterlockWorker} property.
+   * @see #jobInterlockWorker
+   */
+  public void setJobInterlockWorker(BJobInterlockWorker v) { set(jobInterlockWorker, v, null); }
+
+////////////////////////////////////////////////////////////////
 // Action "tagIt"
 ////////////////////////////////////////////////////////////////
   
@@ -218,7 +253,7 @@ public class BTagImporter extends BComponent {
    * Invoke the {@code tagIt} action.
    * @see #tagIt
    */
-  public BSimpleJob tagIt(BString parameter) { return (BSimpleJob)invoke(tagIt, parameter, null); }
+  public void tagIt(BString parameter) { invoke(tagIt, parameter, null); }
 
 ////////////////////////////////////////////////////////////////
 // Action "removeIt"
@@ -234,7 +269,7 @@ public class BTagImporter extends BComponent {
    * Invoke the {@code removeIt} action.
    * @see #removeIt
    */
-  public BSimpleJob removeIt(BString parameter) { return (BSimpleJob)invoke(removeIt, parameter, null); }
+  public void removeIt(BString parameter) { invoke(removeIt, parameter, null); }
 
 ////////////////////////////////////////////////////////////////
 // Action "fetchIt"
@@ -250,7 +285,7 @@ public class BTagImporter extends BComponent {
    * Invoke the {@code fetchIt} action.
    * @see #fetchIt
    */
-  public BSimpleJob fetchIt() { return (BSimpleJob)invoke(fetchIt, null, null); }
+  public void fetchIt() { invoke(fetchIt, null, null); }
 
 ////////////////////////////////////////////////////////////////
 // Type
@@ -319,8 +354,7 @@ public class BTagImporter extends BComponent {
   private static Logger logger = Logger.getLogger("Resolute Tag Utils");
   private AtomicReference<Boolean> isJobRunning = new AtomicReference<>(false);
   private BPointTable pointTable;
-  private BSimpleJob runningJob; //TODO RETURNING A NULL REFERENCE WHEN CALLED FROM TAGIT line 69
-                                      //TODO AND WHILE BEING ASSIGNED TO AN INVOKED FETCHIT JOB...!
+  private BSimpleJob runningJob;
 
   public BPointTable getPointTable(){ return pointTable; }
   public void setPointTable(BPointTable pointTable){
@@ -429,7 +463,32 @@ public class BTagImporter extends BComponent {
     }
   }
 
-  public BSimpleJob doTagIt(BString filter, Context cx){
+  public void doTagIt(BString filter, Context cx){
+    if(getRunningJob() != null){
+
+      //TODO - do a fetch job before tagging
+
+      if(getRunningJob().isAlive()){
+        logger.info("Tried to run tagIt, but there's another job running...!");
+      }else{
+        BSimpleJob job = new BTaggingJob();
+        if(!filter.getString().isEmpty()){
+          try{
+            setTaggingFilter(filter.encodeToString());
+            BJobService.getService().submit(job, cx);
+          }catch(IOException ioe){
+            logger.severe(ioe.getMessage());
+            ioe.printStackTrace();
+          }
+        }else{
+          NullPointerException npe = new NullPointerException();
+          logger.severe("[Bulk Tag Remove Op Error] - Tag filter field can't be empty...! "
+                  + npe.getMessage());
+          throw npe;
+        }
+        setRunningJob(job);
+      }
+    }else{
       BSimpleJob job = new BTaggingJob();
       if(!filter.getString().isEmpty()){
         try{
@@ -446,10 +505,32 @@ public class BTagImporter extends BComponent {
         throw npe;
       }
       setRunningJob(job);
-      return job;
+    }
   }
 
-  public BSimpleJob doRemoveIt(BString filter, Context cx){
+  public void doRemoveIt(BString filter, Context cx){
+    if(getRunningJob() != null){
+      if(getRunningJob().isAlive()){
+        logger.info("Tried to run tagIt, but there's another job running...!");
+      }else{
+        BSimpleJob job = new BBulkTagRemoveJob();
+        if(!filter.getString().isEmpty()){
+          try{
+            setDeleteFilter(filter.encodeToString());
+            BJobService.getService().submit(job, cx);
+          }catch(IOException ioe){
+            logger.severe(ioe.getMessage());
+            ioe.printStackTrace();
+          }
+        }else{
+          NullPointerException npe = new NullPointerException();
+          logger.severe("[Bulk Tag Remove Op Error] - Tag filter field can't be empty...! "
+                  + npe.getMessage());
+          throw npe;
+        }
+        setRunningJob(job);
+      }
+    }else{
       BSimpleJob job = new BBulkTagRemoveJob();
       if(!filter.getString().isEmpty()){
         try{
@@ -466,17 +547,32 @@ public class BTagImporter extends BComponent {
         throw npe;
       }
       setRunningJob(job);
-      return job;
+    }
   }
 
-  public BSimpleJob doFetchIt(Context cx){
-    BSimpleJob job = new BFetchJob();
-    BJobService.getService().submit(job, cx);
-    setRunningJob(job);
-    return job;
+  public void doFetchIt(Context cx){
+    if(getRunningJob() != null){
+      if(getRunningJob().isAlive()){
+        logger.info("Tried to run tagIt, but there's another job running...!");
+      }else{
+        BSimpleJob job = new BFetchJob();
+        BJobService.getService().submit(job, cx);
+        setRunningJob(job);
+      }
+    }else{
+      BSimpleJob job = new BFetchJob();
+      BJobService.getService().submit(job, cx);
+      setRunningJob(job);
+    }
   }
 
   public static BTagImporter make(){
     return new BTagImporter();
+  }
+
+  public IFuture post(Action a, BValue arg, Context cx){
+    Invocation work = new Invocation(this, a, arg, cx);
+    this.getJobInterlockWorker().postWork(work);
+    return null;
   }
 }

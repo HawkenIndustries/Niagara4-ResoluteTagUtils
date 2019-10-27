@@ -74,7 +74,9 @@ public class BFetchJob extends BSimpleJob {
             checkCachedVersion(response.getMsg(), tagImporter, updateUrl);
 
         }catch(Exception e){
+            logger.severe(e.getMessage());
             e.printStackTrace();
+            fetchFromServer(tagImporter, updateUrl);
         }
 
 

@@ -20,7 +20,6 @@ import javax.baja.sys.*;
 import javax.baja.tag.TagDictionary;
 import javax.baja.tag.TagDictionaryService;
 import javax.baja.tag.TagInfo;
-
 import java.io.IOException;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
@@ -52,7 +51,7 @@ public class BTaggingJob extends BSimpleJob {
             .create();
 
     /***
-     *
+     * Run an asynchronous tagging job
      * @param cx
      * @throws Exception
      */
@@ -73,11 +72,9 @@ public class BTaggingJob extends BSimpleJob {
         if(points != null){
             BPointTable table = BPointTable.make();
             table.set(points);
-            tagImporter.setPointTable(table);
         }
 
         /***
-         * On-Demand implementation of the functional interface multvsearch.
          * Iterates over all tags in every dictionary, checking every rbi tag
          * for every rbi point in the list.
          */
@@ -95,7 +92,9 @@ public class BTaggingJob extends BSimpleJob {
     }
 
     /***
-     *
+     * Takes input from the Niagara Action called by the user as a list of Tag Dictionary names the user would like
+     * to apply tags from, and uses that list to filter from the list of all Tag Dictionaries found in the Niagara
+     * station.
      * @param filter
      * @param tagDictionaries
      * @return
@@ -115,7 +114,9 @@ public class BTaggingJob extends BSimpleJob {
     }
 
     /***
-     *
+     * Performs a tagging operation to a group of niagara point references using the parsed point pojos, the list
+     * of Niagara Tag Dictionaries filtered from the user's input on the Niagara action which is a csv string or a
+     * '*' indicating one, many or all Niagara Tag Dictionaries found on the station.
      * @param pointList
      * @param tagDictionaries
      */
@@ -170,7 +171,8 @@ public class BTaggingJob extends BSimpleJob {
     }
 
     /***
-     *
+     * Return a List of Point objects from the import json file, to be mapped into Baja Component references of
+     * the corresponding niagara points, in order to apply the tags passed in as an array property of each Point object.
      * @param tagImporter
      * @return
      */
