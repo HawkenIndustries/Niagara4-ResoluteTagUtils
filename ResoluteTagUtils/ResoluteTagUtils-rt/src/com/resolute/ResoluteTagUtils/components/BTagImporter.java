@@ -379,8 +379,8 @@ public class BTagImporter extends BComponent {
     this.pointTable = pointTable;
   }
 
-  public BSimpleJob getRunningJob(){ return this.runningJob; }
-  private void setRunningJob(BSimpleJob job){
+  public synchronized BSimpleJob getRunningJob(){ return this.runningJob; }
+  private synchronized void setRunningJob(BSimpleJob job){
     runningJob = job;
   }
 
@@ -507,7 +507,7 @@ public class BTagImporter extends BComponent {
          * Fetch should always start first, and end before the tag job begins.
          */
         try {
-          Thread.sleep(60000);
+          Thread.sleep(30000);
         } catch (InterruptedException e) {
           e.printStackTrace();
         }
