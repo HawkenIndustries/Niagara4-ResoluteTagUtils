@@ -1,9 +1,20 @@
+/***
+ * 10/27/2019
+ * Victor Smolinski
+ *
+ * The Tag Importer object runs under the Resolute Tag Utils so it runs as a niagara service.
+ * It provides three asynchronous niagara actions managed by the niagara job service:
+ *  Fetch
+ *  Tag
+ *  Remove (tags)
+ */
+
 package com.resolute.ResoluteTagUtils.components;
 
 import com.resolute.ResoluteTagUtils.jobs.BBulkTagRemoveJob;
 import com.resolute.ResoluteTagUtils.jobs.BFetchJob;
 import com.resolute.ResoluteTagUtils.jobs.BTaggingJob;
-import com.resolute.ResoluteTagUtils.utils.BJobInterlockWorker;
+import com.resolute.ResoluteTagUtils.utils.BResoluteWorker;
 
 import javax.baja.file.BFileSystem;
 import javax.baja.file.BIDirectory;
@@ -23,7 +34,6 @@ import javax.baja.util.IFuture;
 import javax.baja.util.Invocation;
 
 import java.io.IOException;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Logger;
 
 @NiagaraType
@@ -66,9 +76,9 @@ import java.util.logging.Logger;
 )
 
 @NiagaraProperty(
-        name = "jobInterlockWorker",
-        type = "ResoluteTagUtils:JobInterlockWorker",
-        defaultValue = "BJobInterlockWorker.make()",
+        name = "ResoluteWorker",
+        type = "ResoluteTagUtils:ResoluteWorker",
+        defaultValue = "BResoluteWorker.make()",
         flags = Flags.SUMMARY
 )
 
@@ -98,8 +108,8 @@ import java.util.logging.Logger;
 
 public class BTagImporter extends BComponent {
 /*+ ------------ BEGIN BAJA AUTO GENERATED CODE ------------ +*/
-/*@ $com.resolute.ResoluteTagUtils.components.BTagImporter(2730843638)1.0$ @*/
-/* Generated Fri Oct 25 15:59:00 EDT 2019 by Slot-o-Matic (c) Tridium, Inc. 2012 */
+/*@ $com.resolute.ResoluteTagUtils.components.BTagImporter(814572728)1.0$ @*/
+/* Generated Sun Oct 27 18:24:47 EDT 2019 by Slot-o-Matic (c) Tridium, Inc. 2012 */
 
 ////////////////////////////////////////////////////////////////
 // Property "tags"
@@ -217,27 +227,27 @@ public class BTagImporter extends BComponent {
   public void setTaggingFilter(String v) { setString(taggingFilter, v, null); }
 
 ////////////////////////////////////////////////////////////////
-// Property "jobInterlockWorker"
+// Property "ResoluteWorker"
 ////////////////////////////////////////////////////////////////
   
   /**
-   * Slot for the {@code jobInterlockWorker} property.
-   * @see #getJobInterlockWorker
-   * @see #setJobInterlockWorker
+   * Slot for the {@code ResoluteWorker} property.
+   * @see #getResoluteWorker
+   * @see #setResoluteWorker
    */
-  public static final Property jobInterlockWorker = newProperty(Flags.SUMMARY, BJobInterlockWorker.make(), null);
+  public static final Property ResoluteWorker = newProperty(Flags.SUMMARY, BResoluteWorker.make(), null);
   
   /**
-   * Get the {@code jobInterlockWorker} property.
-   * @see #jobInterlockWorker
+   * Get the {@code ResoluteWorker} property.
+   * @see #ResoluteWorker
    */
-  public BJobInterlockWorker getJobInterlockWorker() { return (BJobInterlockWorker)get(jobInterlockWorker); }
+  public BResoluteWorker getResoluteWorker() { return (BResoluteWorker)get(ResoluteWorker); }
   
   /**
-   * Set the {@code jobInterlockWorker} property.
-   * @see #jobInterlockWorker
+   * Set the {@code ResoluteWorker} property.
+   * @see #ResoluteWorker
    */
-  public void setJobInterlockWorker(BJobInterlockWorker v) { set(jobInterlockWorker, v, null); }
+  public void setResoluteWorker(BResoluteWorker v) { set(ResoluteWorker, v, null); }
 
 ////////////////////////////////////////////////////////////////
 // Action "tagIt"
@@ -352,7 +362,15 @@ public class BTagImporter extends BComponent {
    ***/
 
   private static Logger logger = Logger.getLogger("Resolute Tag Utils");
-  private AtomicReference<Boolean> isJobRunning = new AtomicReference<>(false);
+
+  /***
+   * Point table is a collection of rows defined by a list of columns which provides the niagara model for a
+   * manager view niagara ui.
+   *
+   * The running job is a job object holding a reference to the current running asynchronous job in order to allow
+   * for implementing a strict order of operations, and yet freeing up the main control engine thread, in order to
+   * avoid louzy user experience and watchdog timeouts.
+   */
   private BPointTable pointTable;
   private BSimpleJob runningJob;
 
@@ -366,6 +384,10 @@ public class BTagImporter extends BComponent {
     runningJob = job;
   }
 
+  /***
+   * Baja component lifecycle callback to initialize component after dragging and dropping it from the palette
+   *
+   */
   @Override
   public void started(){
       logger.fine("TagImporter...started");
@@ -414,6 +436,9 @@ public class BTagImporter extends BComponent {
     }
   }
 
+  /***
+   *Baja component lifecyle callback to re-initialize component after a runtime restart event.
+   */
   @Override
   public void atSteadyState(){
 
@@ -463,14 +488,30 @@ public class BTagImporter extends BComponent {
     }
   }
 
+  /***
+   * Performs a fetch job in order to ensure tagging from the latest copy of the import file.
+   * It allows tagging based on installed tag dictionary filter csv string.
+   * @param filter
+   * @param cx
+   */
   public void doTagIt(BString filter, Context cx){
     if(getRunningJob() != null){
-
-      //TODO - do a fetch job before tagging
-
       if(getRunningJob().isAlive()){
         logger.info("Tried to run tagIt, but there's another job running...!");
       }else{
+        invoke(fetchIt, null, null);
+        while(getRunningJob().isAlive()){}
+
+        /***
+         * Test the order in wich fetch and tag jobs are started and finished.
+         * Fetch should always start first, and end before the tag job begins.
+         */
+        try {
+          Thread.sleep(60000);
+        } catch (InterruptedException e) {
+          e.printStackTrace();
+        }
+
         BSimpleJob job = new BTaggingJob();
         if(!filter.getString().isEmpty()){
           try{
@@ -508,6 +549,13 @@ public class BTagImporter extends BComponent {
     }
   }
 
+  /***
+   * Removes direct tags from all points in the station or by scope through the targetStationPath(future) property.
+   * It also uses a csv string to filter tags to be removed by dictionary, or tag name which can both be part of the
+   * same filter string in order to remove both filter types in one single operation.
+   * @param filter
+   * @param cx
+   */
   public void doRemoveIt(BString filter, Context cx){
     if(getRunningJob() != null){
       if(getRunningJob().isAlive()){
@@ -550,6 +598,15 @@ public class BTagImporter extends BComponent {
     }
   }
 
+  /***
+   * Fetch it makes to GET http requests to the tagImport server, the first one checks the document update version online,
+   * and compares it with the local cached document, if there isn't any local cache yet, or the local version is older than
+   * the online version of the tag import document it fetches the document from the server, stores it in cache, and puts
+   * a copy in the station's own file system, where is visible to the user.
+   * If the cached version is equal to the server's it will fetch from the local file system avoiding a network call, and
+   * it will copy to the station where the tagging operation takes its data from.
+   * @param cx
+   */
   public void doFetchIt(Context cx){
     if(getRunningJob() != null){
       if(getRunningJob().isAlive()){
@@ -566,13 +623,17 @@ public class BTagImporter extends BComponent {
     }
   }
 
+  /***
+   *
+   * @return
+   */
   public static BTagImporter make(){
     return new BTagImporter();
   }
 
   public IFuture post(Action a, BValue arg, Context cx){
     Invocation work = new Invocation(this, a, arg, cx);
-    this.getJobInterlockWorker().postWork(work);
+    this.getResoluteWorker().postWork(work);
     return null;
   }
 }

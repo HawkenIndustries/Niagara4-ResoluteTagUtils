@@ -1,3 +1,12 @@
+/***
+ * 10/27/2019
+ * Victor Smolinski
+ *
+ * It allows a Niagara user to remove direct tags from Niagara components in bulk using a csv string as a
+ * filter, which can be used to filter by tag dictionary or by tag name as comma separated values,
+ * if all tags from all dictionaries need to be deleted then just enter '*'.
+ */
+
 package com.resolute.ResoluteTagUtils.jobs;
 
 import com.resolute.ResoluteTagUtils.components.BTagImporter;
@@ -49,6 +58,7 @@ public class BBulkTagRemoveJob extends BSimpleJob {
         BTagImporter tagImporter =
                 ((BResoluteTagUtils)Sys.getService(BResoluteTagUtils.TYPE)).getTagImporter();
 
+        setProgress(0);
         progress(0);
         logger.info("Bulk-Tag-Remove-Job Progress...".concat(String.valueOf(getProgress())));
 
@@ -63,6 +73,7 @@ public class BBulkTagRemoveJob extends BSimpleJob {
             this.cancel();
         }else{
             String[] filters = tagImporter.getDeleteFilter().split(",");
+            setProgress(1);
             progress(1);
             logger.info("Bulk-Tag-Remove-Job Progress...".concat(String.valueOf(getProgress())));
             points.forEach( point -> {
@@ -72,15 +83,15 @@ public class BBulkTagRemoveJob extends BSimpleJob {
                     AtomicReference<Integer> totalOps = new AtomicReference<>(0);
                     long progressUnitPerPoint = 100 / points.size();
                     before = System.currentTimeMillis();
-
                     point.tags().forEach( tag -> {
 
                         ///////////BENCHMARK////////////////////////////////////////////////////////////
                         totalOps.set(totalOps.get() + point.tags().getAll().size());
                         long progressUnit = progressUnitPerPoint / point.tags().getAll().size();
                         if(getProgress() < 100){
-                            int progress = 0;
-                            progress(progress+=progressUnit);
+                            int p = getProgress();
+                            setProgress(p+=progressUnit);
+                            progress(p+=progressUnit);
                         }
                         ///////////BENCHMARK////////////////////////////////////////////////////////////
                         boolean removed = point.tags().remove(tag);
@@ -110,6 +121,12 @@ public class BBulkTagRemoveJob extends BSimpleJob {
         }
     }
 
+    /***
+     * The member resolve takes a bql query as an argument to scope out the points the operation will use as
+     * its data set. It returns an ArrayList of BComponents resolved from the query.
+     * @param query
+     * @return
+     */
     @SuppressWarnings("unchecked")
     public ArrayList<BComponent> resolve(BString query){
         ArrayList<BComponent> objRefs = new ArrayList<>();
@@ -126,6 +143,12 @@ public class BBulkTagRemoveJob extends BSimpleJob {
         return objRefs;
     }
 
+    /***
+     * Pass this method to a consumer action operating on a collection of niagara components, use it to
+     * filter through the components by tag and remove the selected ones.
+     * @param filter
+     * @param point
+     */
     private void filterTags(String[]filter, BComponent point) {
         for(String f : filter){
             point.tags().forEach( tag -> {
@@ -142,6 +165,13 @@ public class BBulkTagRemoveJob extends BSimpleJob {
         }
     }
 
+    /***
+     * Pass this method to a consumer action operating on a collection of niagara components, use it to
+     * filter through the components by tag dictionary and remove the selected ones.
+     * @param filter
+     * @param tagDictionaries
+     * @param point
+     */
     private void filterDictionaries(String[] filter,
                                    Collection<TagDictionary> tagDictionaries,
                                    BComponent point) {

@@ -1,3 +1,13 @@
+/***
+ * 10/27/2019
+ * Victor Smolinski
+ *
+ * It allows a ResoluteBI and Niagara user to map tagged data from their building over
+ * to a Niagara Station's installed Tag Dictionaries, through the use of a csv filter string.
+ * to add tags only from specific Niagara Tag Dictionaries add them to the input text box
+ * separated by comma; else to do all Tag Dictionaries use '*'
+ */
+
 package com.resolute.ResoluteTagUtils.jobs;
 
 import com.google.gson.Gson;
@@ -65,6 +75,9 @@ public class BTaggingJob extends BSimpleJob {
         String rawFilter = tagImporter.getTaggingFilter();
 
         HashSet<Point> points = getPoints(tagImporter);
+
+        setProgress(0);
+        progress(0);
 
         /***
          * Pass the hashset to a baja table for the ui to display values...

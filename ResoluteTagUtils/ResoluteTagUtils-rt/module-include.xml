@@ -18,5 +18,5 @@
   <type class="com.resolute.ResoluteTagUtils.jobs.BBulkTagRemoveJob" name="BulkTagRemoveJob"/>
   <type class="com.resolute.ResoluteTagUtils.jobs.BFetchJob" name="FetchJob"/>
   <!--com.resolute.ResoluteTagUtils.utils-->
-  <type class="com.resolute.ResoluteTagUtils.utils.BJobInterlockWorker" name="JobInterlockWorker"/>
+  <type class="com.resolute.ResoluteTagUtils.utils.BResoluteWorker" name="ResoluteWorker"/>
 </types>

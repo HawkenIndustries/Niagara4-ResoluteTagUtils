@@ -1,3 +1,14 @@
+/***
+ * 10/27/2019
+ * Victor Smolinski
+ *
+ * It allows a ResoluteBI and Niagara user to fetch Resolute tags online from a Resolute
+ * tag import server, or from a cached version of the json document. This object also makes
+ * decisions about wether to draw the data from the local cache based on version, and
+ * gracefully fails to fetch onlline when no cache is found, or fetch from the cache if a
+ * network connection is refused or fails with an HTTP error.
+ */
+
 package com.resolute.ResoluteTagUtils.jobs;
 
 import com.google.gson.Gson;
@@ -59,6 +70,9 @@ public class BFetchJob extends BSimpleJob {
         headers.put("Accept", "application/json");
 
         try{
+            setProgress(0);
+            progress(0);
+
             HttpClientConnection versionConn = HttpClientConnection.builder()
                     .withHttpMethod("GET")
                     .withHeaders(headers)
@@ -72,17 +86,23 @@ public class BFetchJob extends BSimpleJob {
             logger.info("HTTP Msg: ".concat(String.valueOf(response.getMsg())));
 
             checkCachedVersion(response.getMsg(), tagImporter, updateUrl);
-
+            setProgress(100);
+            progress(100);
         }catch(Exception e){
             logger.severe(e.getMessage());
             e.printStackTrace();
             fetchFromServer(tagImporter, updateUrl);
+            setProgress(100);
+            progress(100);
         }
-
-
-
     }
 
+    /***
+     * Tries to fetch the import document from the server, if it fails it tries from the local
+     * cache.
+     * @param tagImporter
+     * @param serverUrl
+     */
     public void fetchFromServer(BTagImporter tagImporter, URL serverUrl){
         HttpURLConnection con;
         try{
@@ -98,6 +118,9 @@ public class BFetchJob extends BSimpleJob {
             logger.fine("HTTP Response Status: "+con.getResponseMessage());
 
             if(status == 200){
+                setProgress(50);
+                progress(50);
+
                 log().message("Connection found with HTTP Status ".concat(String.valueOf(status)));
                 BufferedReader in = new BufferedReader(
                         new InputStreamReader(con.getInputStream()));
@@ -108,7 +131,13 @@ public class BFetchJob extends BSimpleJob {
                 }
                 in.close();
                 String c = content.toString();
+
+                setProgress(70);
+                progress(70);
                 writeToSharedFile(c);
+
+                setProgress(85);
+                progress(85);
                 writeToStationFile(c, tagImporter);
                 logger.fine(content.toString());
 
@@ -139,7 +168,11 @@ public class BFetchJob extends BSimpleJob {
                         content.append(inputLine);
                     }
                 }
+                setProgress(75);
+                progress(75);
                 writeToStationFile(content.toString(), tagImporter);
+                setProgress(85);
+                progress(85);
             }catch(FileNotFoundException fnfe){
                 logger.severe("File not found in ".concat(Sys.getNiagaraSharedUserHome().getAbsolutePath()));
                 logger.severe(fnfe.getMessage());
@@ -151,10 +184,17 @@ public class BFetchJob extends BSimpleJob {
         }
     }
 
+    /***
+     * Tries to fetch the import document from the local cache Sys.getNiagaraSharedUser...
+     * If it fails it tries to get it from the network, it that fails it exits the job
+     * unsuccesfully.
+     * @param tagImporter
+     */
     private void fetchFromCache(BTagImporter tagImporter){
         try{
             File f = new File(Sys.getNiagaraSharedUserHome(), "rbiTagImport.json");
-
+            setProgress(50);
+            progress(50);
             StringBuilder content;
             try (BufferedReader in = new BufferedReader(new FileReader(f))) {
                 content = new StringBuilder();
@@ -163,7 +203,11 @@ public class BFetchJob extends BSimpleJob {
                     content.append(inputLine);
                 }
             }
+            setProgress(75);
+            progress(75);
             writeToStationFile(content.toString(), tagImporter);
+            setProgress(85);
+            progress(85);
         }catch(FileNotFoundException fnfe){
             logger.severe("File not found in ".concat(Sys.getNiagaraSharedUserHome().getAbsolutePath()));
             logger.severe(fnfe.getMessage());
@@ -174,6 +218,18 @@ public class BFetchJob extends BSimpleJob {
         }
     }
 
+    /***
+     * Makes a network call to check the document version for any updates to tags, points,
+     * or any other relevant data, in production a server would automatically update the version
+     * as station event changes are stored in a queue and used by subscribers of those events to
+     * update other parts of the system, one of those actions based on niagara events handled by
+     * the server would be to update the tag import document version number.
+     * In theory with large json documents, a call for such a small json object would be much
+     * cheaper than fetching the entire document just to compare version with the cached document.
+     * @param jsonVersion
+     * @param tagImporter
+     * @param serverUrl
+     */
     private void checkCachedVersion(String jsonVersion, BTagImporter tagImporter, URL serverUrl){
         AccessController.doPrivileged((PrivilegedAction <Void>)() -> {
             try{
@@ -188,6 +244,8 @@ public class BFetchJob extends BSimpleJob {
                 double cacheVersion = Double.parseDouble(fileContent.get("version").getAsString());
                 final String msg = "Cached Version: ".concat(String.valueOf(cacheVersion)) +
                                    "\nLatest Version: ".concat(String.valueOf(latestVersion));
+                setProgress(25);
+                progress(25);
                 if(latestVersion == cacheVersion){
                     logger.info("EQUAL VERSIONS...");
                     logger.info(msg);
@@ -212,6 +270,11 @@ public class BFetchJob extends BSimpleJob {
         });
     }
 
+    /***
+     * Re-writes the cached tag import file. Used when updating the cached with a fresh copy from
+     * the server.
+     * @param content
+     */
     private void writeToSharedFile(String content){
         try{
             if(!content.isEmpty()){
@@ -237,6 +300,13 @@ public class BFetchJob extends BSimpleJob {
         }
     }
 
+    /***
+     * Writes to the niagara runtime's file system, where it becomes available to station
+     * processes and the station users. It is necesary to write to this file before tagging.
+     * This file is unconsequential when performing remove operations.
+     * @param content
+     * @param tagImporter
+     */
     private void writeToStationFile(String content, BTagImporter tagImporter){
         try{
             boolean importFileExists = false;
@@ -247,7 +317,6 @@ public class BFetchJob extends BSimpleJob {
                     f.write("".getBytes());
                     f.write(content.getBytes());
                     importFileExists = true;
-                    progress(100);
                     break;
                 }
             }
@@ -256,7 +325,6 @@ public class BFetchJob extends BSimpleJob {
                 FilePath fp = (FilePath)queries[queries.length-1];
                 BIFile file = BFileSystem.INSTANCE.makeFile(fp, null);
                 file.write(content.getBytes());
-                progress(100);
             }
         }catch(UnresolvedException | IOException ue){
             log().message(ue.getMessage());

@@ -10,7 +10,7 @@ import javax.baja.util.Worker;
 
 @NiagaraType
 
-public class BJobInterlockWorker extends BWorker {
+public class BResoluteWorker extends BWorker {
 /*+ ------------ BEGIN BAJA AUTO GENERATED CODE ------------ +*/
 /*@ $com.resolute.ResoluteTagUtils.utils.BJobInterlockWorker(2979906276)1.0$ @*/
 /* Generated Fri Oct 25 15:30:14 EDT 2019 by Slot-o-Matic (c) Tridium, Inc. 2012 */
@@ -21,7 +21,7 @@ public class BJobInterlockWorker extends BWorker {
   
   @Override
   public Type getType() { return TYPE; }
-  public static final Type TYPE = Sys.loadType(BJobInterlockWorker.class);
+  public static final Type TYPE = Sys.loadType(BResoluteWorker.class);
 
 /*+ ------------ END BAJA AUTO GENERATED CODE -------------- +*/
 
@@ -41,5 +41,5 @@ public class BJobInterlockWorker extends BWorker {
         if(null == queue || !isRunning()) throw new NotRunningException();
         queue.enqueue(runnable);
     }
-    public static BJobInterlockWorker make() { return new BJobInterlockWorker(); }
+    public static BResoluteWorker make() { return new BResoluteWorker(); }
 }
