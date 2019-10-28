@@ -62,6 +62,23 @@ import java.util.logging.Logger;
 )
 
 @NiagaraProperty(
+        name = "scopeOfWork",
+        type = "baja:Ord",
+        defaultValue = "BOrd.make(\"slot:|bql:select * from control:ControlPoint\")",
+        facets = {
+                @Facet( name = "BFacets.TARGET_TYPE", value = "\"bql:IBqlFilter\"")
+        },
+        flags = Flags.SUMMARY
+)
+
+@NiagaraProperty(
+        name = "useScope",
+        type = "baja:Boolean",
+        defaultValue = "BBoolean.make(true)",
+        flags = Flags.OPERATOR | Flags.SUMMARY
+)
+
+@NiagaraProperty(
         name = "deleteFilter",
         type = "baja:String",
         defaultValue = "BString.make(\"\")",
@@ -108,8 +125,8 @@ import java.util.logging.Logger;
 
 public class BTagImporter extends BComponent {
 /*+ ------------ BEGIN BAJA AUTO GENERATED CODE ------------ +*/
-/*@ $com.resolute.ResoluteTagUtils.components.BTagImporter(814572728)1.0$ @*/
-/* Generated Sun Oct 27 18:24:47 EDT 2019 by Slot-o-Matic (c) Tridium, Inc. 2012 */
+/*@ $com.resolute.ResoluteTagUtils.components.BTagImporter(2053133726)1.0$ @*/
+/* Generated Mon Oct 28 09:18:21 EDT 2019 by Slot-o-Matic (c) Tridium, Inc. 2012 */
 
 ////////////////////////////////////////////////////////////////
 // Property "tags"
@@ -179,6 +196,52 @@ public class BTagImporter extends BComponent {
    * @see #importFile
    */
   public void setImportFile(BOrd v) { set(importFile, v, null); }
+
+////////////////////////////////////////////////////////////////
+// Property "scopeOfWork"
+////////////////////////////////////////////////////////////////
+  
+  /**
+   * Slot for the {@code scopeOfWork} property.
+   * @see #getScopeOfWork
+   * @see #setScopeOfWork
+   */
+  public static final Property scopeOfWork = newProperty(Flags.SUMMARY, BOrd.make("slot:|bql:select * from control:ControlPoint"), BFacets.make(BFacets.TARGET_TYPE, "bql:IBqlFilter"));
+  
+  /**
+   * Get the {@code scopeOfWork} property.
+   * @see #scopeOfWork
+   */
+  public BOrd getScopeOfWork() { return (BOrd)get(scopeOfWork); }
+  
+  /**
+   * Set the {@code scopeOfWork} property.
+   * @see #scopeOfWork
+   */
+  public void setScopeOfWork(BOrd v) { set(scopeOfWork, v, null); }
+
+////////////////////////////////////////////////////////////////
+// Property "useScope"
+////////////////////////////////////////////////////////////////
+  
+  /**
+   * Slot for the {@code useScope} property.
+   * @see #getUseScope
+   * @see #setUseScope
+   */
+  public static final Property useScope = newProperty(Flags.OPERATOR | Flags.SUMMARY, ((BBoolean)(BBoolean.make(true))).getBoolean(), null);
+  
+  /**
+   * Get the {@code useScope} property.
+   * @see #useScope
+   */
+  public boolean getUseScope() { return getBoolean(useScope); }
+  
+  /**
+   * Set the {@code useScope} property.
+   * @see #useScope
+   */
+  public void setUseScope(boolean v) { setBoolean(useScope, v, null); }
 
 ////////////////////////////////////////////////////////////////
 // Property "deleteFilter"
@@ -506,11 +569,11 @@ public class BTagImporter extends BComponent {
          * Test the order in wich fetch and tag jobs are started and finished.
          * Fetch should always start first, and end before the tag job begins.
          */
-        try {
+/*        try {
           Thread.sleep(30000);
         } catch (InterruptedException e) {
           e.printStackTrace();
-        }
+        }*/
 
         BSimpleJob job = new BTaggingJob();
         if(!filter.getString().isEmpty()){

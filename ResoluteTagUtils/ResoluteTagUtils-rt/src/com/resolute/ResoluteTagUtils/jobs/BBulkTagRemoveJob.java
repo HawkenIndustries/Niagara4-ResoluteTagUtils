@@ -62,9 +62,13 @@ public class BBulkTagRemoveJob extends BSimpleJob {
         progress(0);
         logger.info("Bulk-Tag-Remove-Job Progress...".concat(String.valueOf(getProgress())));
 
-        ArrayList<BComponent> points = resolve (
-                BString.make(
-                        SlotPath.unescape("slot:|bql: select * from control:ControlPoint")));
+        HashSet<BComponent> points;
+        if(tagImporter.getUseScope()){
+            points = resolve (tagImporter.getScopeOfWork());
+        }else{
+            points = resolve (BOrd.make("slot:|bql:select * from control:ControlPoint"));
+        }
+
         TagDictionaryService tagDictionaryService = Sys.getStation().getTagDictionaryService();
         Collection<TagDictionary> tagDictionaries = tagDictionaryService.getTagDictionaries();
 
@@ -85,34 +89,33 @@ public class BBulkTagRemoveJob extends BSimpleJob {
                     before = System.currentTimeMillis();
                     point.tags().forEach( tag -> {
 
-                        ///////////BENCHMARK////////////////////////////////////////////////////////////
+
                         totalOps.set(totalOps.get() + point.tags().getAll().size());
                         long progressUnit = progressUnitPerPoint / point.tags().getAll().size();
+
                         if(getProgress() < 100){
                             int p = getProgress();
                             setProgress(p+=progressUnit);
                             progress(p+=progressUnit);
                         }
-                        ///////////BENCHMARK////////////////////////////////////////////////////////////
+
                         boolean removed = point.tags().remove(tag);
                         String msg = "Removed ".concat(tag.getId().getQName()) +
-                                " - ".concat(String.valueOf(removed)) +
-                                " - Progress...".concat(String.valueOf(getProgress()));
+                                " - ".concat(String.valueOf(removed));
                         log().message(msg);
                         logger.info(msg);
                     });
-
-                    ///////////BENCHMARK////////////////////////////////////////////////////////////
-                    after = System.currentTimeMillis();
-                    elapsed = after - before;
-                    logger.info("N of Points: ".concat(String.valueOf(points.size())));
-                    logger.info("Start Time: ".concat(String.valueOf(before)));
-                    logger.info("End Time: ".concat(String.valueOf(after)));
-                    logger.info("------------");
-                    logger.info("Elapsed Time: ".concat(String.valueOf(elapsed)));
-                    logger.info("Total Ops: ".concat(String.valueOf(totalOps.get())));
-                    logger.info("Time elapsed Per Operation: "
+                     after = System.currentTimeMillis();
+                     elapsed = after - before;
+                     logger.info("Point: ".concat(point.getName()));
+                     logger.info("Start Time: ".concat(String.valueOf(before)));
+                     logger.info("End Time: ".concat(String.valueOf(after)));
+                     logger.info("------------");
+                     logger.info("Elapsed Time: ".concat(String.valueOf(elapsed)));
+                     logger.info("Total Ops: ".concat(String.valueOf(totalOps.get())));
+                     logger.info("Time elapsed Per Operation: "
                             .concat(String.valueOf((double) elapsed / (double)totalOps.get())) + " millis");
+
                 }else{
                     filterDictionaries(filters, tagDictionaries, point);
                     filterTags(filters, point);
@@ -124,14 +127,13 @@ public class BBulkTagRemoveJob extends BSimpleJob {
     /***
      * The member resolve takes a bql query as an argument to scope out the points the operation will use as
      * its data set. It returns an ArrayList of BComponents resolved from the query.
-     * @param query
+     * @param ord
      * @return
      */
     @SuppressWarnings("unchecked")
-    public ArrayList<BComponent> resolve(BString query){
-        ArrayList<BComponent> objRefs = new ArrayList<>();
-        BOrd ord = BOrd.make(query.getString());
+    public HashSet<BComponent> resolve(BOrd ord){
         BITable<BComponent> t = (BITable)ord.resolve(Sys.getStation()).get();
+        HashSet<BComponent> objRefs = new HashSet<>(100, 100);
         TableCursor<BComponent> c = t.cursor();
         while(c.next()){
             try{

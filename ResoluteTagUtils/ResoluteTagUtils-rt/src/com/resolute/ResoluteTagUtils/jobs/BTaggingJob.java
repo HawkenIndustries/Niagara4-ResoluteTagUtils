@@ -159,8 +159,14 @@ public class BTaggingJob extends BSimpleJob {
                                 if(tagInfo.getName().equals(tag)){
                                     try{
                                         log().message("Found Matching Tag...!!!");
+
+                                        /***
+                                         * Remove this line when we can handle reformatting the metric ID up at the server, as it should be.
+                                         */
                                         String relPath = "slot:".concat(
                                                 (point.getMetricId().split("\\."))[1] );
+
+
                                         BOrd ord = BOrd.make(SlotPath.unescape(relPath));
                                         tagInfo.setTagOn((BComponent) ord.get(Sys.getStation()));
 
@@ -181,6 +187,16 @@ public class BTaggingJob extends BSimpleJob {
                 logger.severe("Parsed a null list out of json file...!!!");
             }
         }
+    }
+
+    /***
+     * FUTURE - resolve a batch of baja components and return them in a hashset in order to compare against the set
+     * points parsed out of the import file.
+     * @param scope
+     * @return
+     */
+    public HashSet<BComponent> resolveScope(BOrd scope){
+        return null;
     }
 
     /***
