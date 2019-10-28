@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<module name="ResoluteTagUtils-rt" bajaVersion="0" vendor="com.resolute" vendorVersion="1.0" description="Utilities to perform out-of-band tag import / export and tagging ops." preferredSymbol="restu" nre="true" autoload="true" installable="true" buildMillis="1572217287607" buildHost="VictorSmolinski" moduleName="ResoluteTagUtils" runtimeProfile="rt">
+<module name="ResoluteTagUtils-rt" bajaVersion="0" vendor="com.resolute" vendorVersion="1.0" description="Utilities to perform out-of-band tag import / export and tagging ops." preferredSymbol="restu" nre="true" autoload="true" installable="true" buildMillis="1572233208025" buildHost="VictorSmolinski" moduleName="ResoluteTagUtils" runtimeProfile="rt">
  <dependencies>
   <dependency name="control-wb" vendor="Tridium" vendorVersion="4.6"/>
   <dependency name="driver-ux" vendor="Tridium" vendorVersion="4.6"/>
