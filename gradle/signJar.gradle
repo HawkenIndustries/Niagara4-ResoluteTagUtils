@@ -1,0 +1,48 @@
+//DEVELOPMENT ONLY
+
+def station = 'TestFXStation'
+def pass = 'resolut3B!'
+def store = 'n4resolute.jks'
+def alias = "n4mod-cert"
+def jarName = project.name
+def jarDir = 'C:\\JCI\\FXWorkbench-14.6\\modules'
+def certDir = 'C:\\Users\\Victor Smolinski\\Niagara4.7\\vykon\\certManagement'
+def n4JreDir = '../../../../../../../../niagara/niagara-4.7.109.20/jre/bin'
+
+task signJar(type:Exec){
+    commandLine 'jarsigner',
+            '-keystore', certDir.concat('\\'+store),
+            '-storepass', pass,
+            jarDir.concat('\\'+jarName+'.jar'),
+            alias
+}
+
+/*task runStation(type:Exec){
+    workingDir = n4JreDir
+    commandLine 'station', station
+    ignoreExitValue = true
+}
+
+task makeKeyStore(type:Exec){
+    workingDir n4JreDir
+    commandLine 'keytool',
+            '-genkey',
+            '-alias', alias,
+            '-keyAlg', 'RSA',
+            '-ext', 'EKU=\"codeSigning\"',
+            '-validity', '600',
+            '-keypass', pass,
+            '-storepass', pass,
+            '-keystore', certDir.concat('\\'+store),
+            '-dname', 'CN=Victor Smolinski, OU=Development, O=Resolute BI, L=Birmingham, ST=Michigan, C=US'
+}
+
+task exportCert(type:Exec){
+    workingDir n4JreDir
+    commandLine 'keytool',
+            '-export',
+            '-keystore', certDir.concat('\\'+store),
+            '-alias', alias,
+            '-file', certDir+'\\'+alias+'.cer',
+            '-rfc'
+}*/
