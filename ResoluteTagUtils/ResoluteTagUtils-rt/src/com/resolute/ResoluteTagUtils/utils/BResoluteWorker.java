@@ -10,7 +10,7 @@ import javax.baja.util.Worker;
 
 @NiagaraType
 
-public class BResoluteWorker extends BWorker {
+public class  BResoluteWorker extends BWorker {
 /*+ ------------ BEGIN BAJA AUTO GENERATED CODE ------------ +*/
 /*@ $com.resolute.ResoluteTagUtils.utils.BJobInterlockWorker(2979906276)1.0$ @*/
 /* Generated Fri Oct 25 15:30:14 EDT 2019 by Slot-o-Matic (c) Tridium, Inc. 2012 */

@@ -92,7 +92,7 @@ public class Point {
                 Gson gson = new GsonBuilder().setPrettyPrinting()
                                              .serializeNulls()
                                              .create();
-                return gson.toJson(this.getClass());
+                return gson.toJson(this, Point.class);
             });
         }catch(Exception e){
             e.printStackTrace();

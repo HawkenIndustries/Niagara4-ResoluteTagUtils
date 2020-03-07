@@ -11,6 +11,8 @@
   <type class="com.resolute.ResoluteTagUtils.components.BPointRow" name="PointRow"/>
   <type class="com.resolute.ResoluteTagUtils.components.BPointTable" name="PointTable"/>
   <type class="com.resolute.ResoluteTagUtils.components.BPointTableCursor" name="PointTableCursor"/>
+  <type class="com.resolute.ResoluteTagUtils.components.BPointScanner" name="PointScanner"/>
+  <type class="com.resolute.ResoluteTagUtils.components.BSystemSimulator" name="SystemSimulator"/>
   <!--com.resolute.ResoluteTagUtils.ux.services-->
   <type class="com.resolute.ResoluteTagUtils.services.BResoluteTagUtils" name="ResoluteTagUtils"/>
   <!--com.resolute.ResoluteTagUtils.jobs-->
