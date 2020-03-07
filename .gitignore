@@ -8,7 +8,6 @@
 /resolute/ResoluteTagUtils-wb/build/
 .idea/
 sign
-devOps*
 .lock
 .bin
 .properties
